@@ -19,7 +19,11 @@ func (ms *MongoStorage) IsAvailable() bool {
 }
 
 func NewMongoStorage() *MongoStorage {
-	client, err := mongo.NewClient(`mongodb://muckity:muckity@localhost:27017/muckity`)
+	return &MongoStorage{}
+}
+
+func (ms *MongoStorage) SetClient(url string) *MongoStorage {
+	client, err := mongo.NewClient(url)
 	if err != nil {
 		panic(err)
 	}
@@ -29,10 +33,13 @@ func NewMongoStorage() *MongoStorage {
 	if err != nil {
 		panic(err)
 	}
-	mongo := new(MongoStorage)
-	mongo.Client = client
-	return mongo
+	ms.Client = client
+	return ms
 }
 
-// TODO: Make this configurable
+// TODO: Make this configurable and pooled
 var storage = NewMongoStorage()
+
+func NewMuckityStorage(url string) *MongoStorage {
+	return storage.SetClient(url)
+}
