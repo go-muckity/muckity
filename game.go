@@ -57,7 +57,7 @@ func main() {
 I'm using a custom struct that implements the Persistent interface.
 `
 	w.zones = make([]string,0)
-	res, err := storage.Save(w)
+	_, err := storage.Save(w)
 	if err != nil {
 		panic(err)
 	}
