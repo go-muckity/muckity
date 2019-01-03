@@ -6,12 +6,14 @@ type muckityConfig struct {
 }
 
 type MuckityConfig struct {
-
+	done chan interface{}
+	muckityConfig
 }
 
 // TODO: Make this return a system and use init()
-func GetMuckityConfig() (*muckityConfig, error) {
-	gc := new(muckityConfig)
+func GetMuckityConfig() (*MuckityConfig, error) {
+	gc := new(MuckityConfig)
+	gc.done = make(chan interface{})
 	return gc, nil
 }
 
