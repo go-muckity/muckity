@@ -61,7 +61,4 @@ I'm using a custom struct that implements the Persistent interface.
 	if err != nil {
 		panic(err)
 	}
-	if value, ok := res.(myWorld); ok {
-		fmt.Println("ID\t: ", value.DBId())
-	}
 }
