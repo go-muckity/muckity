@@ -16,7 +16,6 @@ env:
 - MONGODB_VERSION=3.6
 - MONGODB_VERSION=4.0
 - MONGODB_VERSION=4.1
-- MONGO_EXPRESS_VERSION=0.49
 
 before_install:
 - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
