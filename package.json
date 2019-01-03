@@ -1,0 +1,28 @@
+{
+  "name": "muckity-test-suite",
+  "version": "1.0.0",
+  "description": "internal package never to be published",
+  "main": "game_test.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node game_test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsal/muckity.git"
+  },
+  "keywords": [
+    "muckity-test"
+  ],
+  "author": "michael k <mking@arikel.net>",
+  "license": "game_test.js is public domain; see LICENSE.md for muckity",
+  "bugs": {
+    "url": "https://github.com/tsal/muckity/issues"
+  },
+  "homepage": "https://github.com/tsal/muckity#readme",
+  "dependencies": {
+    "mongodb": "^3.1.10"
+  }
+}
