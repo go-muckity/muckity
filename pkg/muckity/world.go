@@ -18,6 +18,10 @@ func (w MuckityWorld) Type() string {
 	return "worlds"
 }
 
+func (w MuckityWorld) Aliases() []string {
+	return make([]string, 0)
+}
+
 func (w MuckityWorld) DBId() string {
 	return fmt.Sprintf("world:%v", slugify.Slugify(w.name))
 }

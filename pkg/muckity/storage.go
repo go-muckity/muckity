@@ -31,13 +31,29 @@ type mongoConfig struct {
 	dbName string
 }
 
-func (gc mongoConfig) asURI() string {
+func (mc mongoConfig) asURI() string {
 	return fmt.Sprintf("mongodb://%v:%v@%v:%v/%v",
-		gc.dbUser,
-		gc.dbPwd,
-		gc.dbHost,
-		gc.dbPort,
-		gc.dbName)
+		mc.dbUser,
+		mc.dbPwd,
+		mc.dbHost,
+		mc.dbPort,
+		mc.dbName)
+}
+
+// Name implements part of MuckitySystem
+func (ms MongoStorage) Name() string {
+	return fmt.Sprintf("system:mongodb:%v", ms.databaseName)
+}
+
+// Type implements part of MuckitySystem
+func (ms MongoStorage) Type() string {
+	return "systems"
+}
+
+// Channels implements part of MuckitySystem
+func (ms MongoStorage) Channels() []chan interface{} {
+	// TODO: implement context handling / closing
+	return make([]chan interface{}, 0)
 }
 
 // Save implements storage persistence for compatible objects
