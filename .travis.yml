@@ -27,9 +27,10 @@ before_install:
 - sleep 5
 - scripts/start-dev-stack.sh docker
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
-
 script:
 - go test -v ./...
+- go run game.go
+- npm install
 - npm run test
 # ref - https://restic.net/blog/2018-09-02/travis-build-cache
 cache:
