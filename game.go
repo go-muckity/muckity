@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/machiel/slugify"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -110,16 +111,22 @@ func (w myWorld) PersistentData() interface{} {
 }
 
 func main() {
-	storage := muckity.GetMuckityStorage()
+	core := muckity.Init()
 	w := new(myWorld)
 	w.name = "Descriptive, aliased, world"
-	w.description = `I am a really descriptive world.
-I'm using a custom struct that implements the Persistent interface.
-`
+	w.description = "I am a test world created for integration testing of the muckity package."
 	w.zones = make([]string, 0)
-	_, err := storage.Save(w)
+	store, err := core.GetSystem("storage")
 	if err != nil {
 		panic(err)
+	}
+	if store, ok := store.(*muckity.MuckityStorage); ok {
+		_, err := store.Save(w)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic(errors.New(fmt.Sprintf("Storage error, uknown storage object: %v", store)))
 	}
 	runLoop(w)
 }
