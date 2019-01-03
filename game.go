@@ -26,7 +26,7 @@ func createTicker() *myTicker {
 	t.tertia = time.NewTicker(muckity.Tertia).C
 	t.turn = time.NewTicker(Turn).C
 	// TODO: use real communications instead of a death timer
-	timeout := time.After(time.Second * 20)
+	timeout := time.After(time.Second * 10)
 	t.done = make(chan interface{})
 	go func() {
 		<-timeout
