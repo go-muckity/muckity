@@ -1,9 +1,17 @@
 package muckity
 
-// MuckityObject is the basic object in the Muckity ECS
-type MuckityObject interface {
+type muckityRoot interface {
 	Name() string
 	Type() string
+}
+
+// MuckityObject is the basic object in the Muckity ECS
+type MuckityObject interface {
+	muckityRoot
+}
+
+type MuckitySystem interface {
+	muckityRoot
 }
 
 type muckityConfig struct {
