@@ -34,7 +34,7 @@ func FieldJoin(sep string, args ...string) string {
 	return strings.Join(args, sep)
 }
 
-// TODO: use a real config lib
+// TODO: use a real config service
 func parseConfig(muckCfg *muckityConfig) {
 	if value, ok := os.LookupEnv("MUCKITY_DB_USERNAME"); ok {
 		muckCfg.mongo.dbUser = value
