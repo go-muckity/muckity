@@ -21,15 +21,6 @@ type muckitySystem interface {
 
 type MuckitySystem interface {
 	muckityRoot
+	muckitySystem
 }
 
-type muckityConfig struct {
-	mongo mongoConfig
-	// TODO: Config the things
-}
-
-// TODO: Make this return a system and use init()
-func GetMuckityConfig() (*muckityConfig, error) {
-	gc := new(muckityConfig)
-	return gc, nil
-}
