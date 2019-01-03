@@ -18,7 +18,7 @@ type MuckityObject interface {
 }
 
 type muckitySystem interface {
-	Channels() []chan interface{}
+	Channels() map[string]chan interface{}
 }
 
 type MuckitySystem interface {
@@ -28,3 +28,4 @@ type MuckitySystem interface {
 
 // Tertia is the next division down from a second; it's also a tick
 const Tertia = time.Second / 60
+
