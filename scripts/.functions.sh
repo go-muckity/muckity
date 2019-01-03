@@ -17,7 +17,7 @@ _make_mongodb() {
         echo "function called out of context: ${DEV_MONGO}!"; exit 1;
     fi
     if [ "$TRAVIS_BUILD_NUMBER" != "" ]; then
-        COMPOSE_PROJECT_NAME=muckity-${TRAVIS_BRANCH_NAME}-${TRAVIS_BUILD_NUMBER}
+        COMPOSE_PROJECT_NAME=muckity-travis
     fi
     docker-compose -f dev-stack.yml up $@
 }
