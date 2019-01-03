@@ -1,5 +1,7 @@
 package muckity
 
+import "time"
+
 type muckityRoot interface {
 	Name() string
 	Type() string
@@ -24,3 +26,5 @@ type MuckitySystem interface {
 	muckitySystem
 }
 
+// Tertia is the next division down from a second; it's also a tick
+const Tertia = time.Second / 60
