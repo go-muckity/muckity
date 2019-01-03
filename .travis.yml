@@ -20,14 +20,17 @@ before_install:
 - sudo apt-get update
 - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 - sleep 5
+- docker pull mongo:${MONGODB_VERSION} | grep -e 'Pulling from' -e Digest -e Status -e Error
+- docker pull mongo-express:0.49 | grep -e 'Pulling from' -e Digest -e Status -e Error
 - scripts/start-dev-stack.sh docker
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 8.14.0
+
 script:
 - go test -v ./...
 - go run game.go
 - npm install
 - npm run test
-# ref - https://restic.net/blog/2018-09-02/travis-build-cache
+
 cache:
   directories:
   - node_modules
