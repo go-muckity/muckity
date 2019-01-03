@@ -1,7 +1,6 @@
 package muckity
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/machiel/slugify"
@@ -16,64 +15,64 @@ type world struct {
 	name string
 }
 
-func NewWorld(name string, options ...func(*world) error) (*world, error) {
-	w := &world{name, }
+func NewWorld(name string, options ...func(*world) error) (world, error) {
+	w := world{name}
 	for _, op := range options {
-		err := op(w)
+		err := op(&w)
 		if err != nil {
-			return nil, err
+			return w, err
 		}
 	}
-	w, err := w.Save()
+	res, err := storage.Save(w)
+	if world, ok := res.(world); ok {
+		return world, nil
+	} else {
+		panic(errors.New(fmt.Sprintf("Unknown error saving new world: %v vs. %v", w, world)))
+	}
+	if err != nil {
+		panic(err)
+	}
 	return w, err
 }
 
-func (w *world) Name() string {
+func (w world) Name() string {
 	return w.name
 }
 
-func (w *world) Type() string {
-	return "world"
+func (w world) Type() string {
+	return "worlds"
 }
 
-func (w *world) Slug() string {
+func (w world) Slug() string {
 	return slugify.Slugify(w.Name())
 }
 
-func (w *world) DBId() string {
+func (w world) DBId() string {
 	return fmt.Sprintf("world:%v", w.Slug())
 }
 
-func (w *world) Metadata() interface{} {
-	metadata := bson.D{
-		{ "$set", bson.D{
+func (w world) Metadata() interface{} {
+	return w.PersistentData()
+}
+func (w world) PersistentData() interface{} {
+	p := bson.D{
+		{"$set", bson.D{
 			{
 				"name",
 				w.Name(),
 			},
 		}},
 	}
-	return metadata
+	return p
 }
 
-func (w *world) Save() (*world, error) {
-	// TODO: Make configurable
-	c := storage.Client.Database("muckity").Collection("worlds")
-	f := bson.D{{
-		"_id",
-		w.DBId(),
-	}}
-	m := w.Metadata()
-	o := newUpsert()
-	res, err := c.UpdateOne(context.TODO(), f, m, &o)
-	if err != nil {
-		panic(err)
-	}
-
-	if value, ok := res.UpsertedID.(string); ok {
-		if value != w.DBId() {
-			return w, errors.New(fmt.Sprintf("Integrity error, got bad ID: %v", value))
+func (w world) Save() (world, error) {
+	if newWorld, err := storage.Save(w); err != nil {
+		return w, err
+	} else {
+		if world, ok := newWorld.(world); ok {
+			return world, nil
 		}
 	}
-	return w, nil
+	return w, errors.New(fmt.Sprintf("Unknnown error saving world: ", w))
 }
