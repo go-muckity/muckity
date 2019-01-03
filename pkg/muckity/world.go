@@ -29,6 +29,7 @@ func (w MuckityWorld) DBId() string {
 func (w MuckityWorld) Metadata() interface{} {
 	return w.PersistentData()
 }
+
 func (w MuckityWorld) PersistentData() interface{} {
 	p := bson.D{
 		{"$set", bson.D{

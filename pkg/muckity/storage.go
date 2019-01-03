@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// MongoStorage implements base storage system for later decoupling
-type MongoStorage struct {
+// MuckityStorage implements base storage system for later decoupling
+type MuckityStorage struct {
 	Client       *mongo.Client
 	databaseName string
 }
@@ -41,23 +41,23 @@ func (mc mongoConfig) asURI() string {
 }
 
 // Name implements part of MuckitySystem
-func (ms MongoStorage) Name() string {
+func (ms MuckityStorage) Name() string {
 	return fmt.Sprintf("system:mongodb:%v", ms.databaseName)
 }
 
 // Type implements part of MuckitySystem
-func (ms MongoStorage) Type() string {
+func (ms MuckityStorage) Type() string {
 	return "systems"
 }
 
 // Channels implements part of MuckitySystem
-func (ms MongoStorage) Channels() []chan interface{} {
+func (ms MuckityStorage) Channels() map[string]chan interface{} {
 	// TODO: implement context handling / closing
-	return make([]chan interface{}, 0)
+	return make(map[string]chan interface{}, 0)
 }
 
 // Save implements storage persistence for compatible objects
-func (ms *MongoStorage) Save(obj MuckityObject) (interface{}, error) {
+func (ms *MuckityStorage) Save(obj MuckityObject) (interface{}, error) {
 	if pObj, ok := obj.(Persistent); ok {
 		coll := ms.Client.Database(ms.databaseName).Collection(obj.Type())
 		pd := pObj.PersistentData()
@@ -81,14 +81,8 @@ func (ms *MongoStorage) Save(obj MuckityObject) (interface{}, error) {
 	return obj, nil
 }
 
-var storage *MongoStorage
-
-func init() {
-	muckCfg, err := GetMuckityConfig()
-	if err != nil {
-		panic(err)
-	}
-	parseConfig(muckCfg)
+func dbInit(done chan interface{}) *MuckityStorage {
+	muckCfg := core.Config()
 	client, err := mongo.NewClient(muckCfg.mongo.asURI())
 	if err != nil {
 		panic(err)
@@ -99,12 +93,8 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	storage = new(MongoStorage)
+	storage := new(MuckityStorage)
 	storage.Client = client
 	storage.databaseName = muckCfg.mongo.dbName
-}
-
-// GetMuckityStorage is a helper function for retrieving the storage system
-func GetMuckityStorage() *MongoStorage {
 	return storage
 }
