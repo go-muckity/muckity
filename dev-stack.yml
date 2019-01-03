@@ -14,7 +14,7 @@ services:
     - $PWD/scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
 
   mongo-express:
-    image: mongo-express:$MONGO_EXPRESS_VERSION
+    image: mongo-express:${MONGO_EXPRESS_VERSION:-0.49}
     restart: always
     ports:
     - 8081:8081
