@@ -59,6 +59,10 @@ func (w myWorld) PersistentData() interface{} {
 	return p
 }
 
+type myTicker struct {
+
+}
+
 func main() {
 	storage := muckity.GetMuckityStorage()
 	w := new(myWorld)
