@@ -14,9 +14,9 @@ const ComplexAction = Turn * 2
 const LongAction = Turn * 3
 
 type myTicker struct {
-	tertia <- chan time.Time
-	turn <- chan time.Time
-	done chan interface{}
+	tertia <-chan time.Time
+	turn   <-chan time.Time
+	done   chan interface{}
 }
 
 func createTicker() *myTicker {
@@ -37,16 +37,16 @@ func runLoop(w *myWorld) error {
 	w.ticker = createTicker()
 	for {
 		select {
-		case <- w.ticker.done:
+		case <-w.ticker.done:
 			fmt.Println("Got a done signal!")
 			return nil
-		case <- w.ticker.turn:
+		case <-w.ticker.turn:
 			if w.turnCycle > 2 {
 				w.turnCycle = 0
 			}
 			fmt.Printf("Turn Cycle: Tick: %v, Turn: %v\n", w.currentTick, w.turnCycle)
 			w.turnCycle++
-		case <- w.ticker.tertia:
+		case <-w.ticker.tertia:
 			w.currentTick++
 		}
 	}
@@ -54,14 +54,14 @@ func runLoop(w *myWorld) error {
 }
 
 type myWorld struct {
-	id					string
-	name				string
-	myContext			context.Context
-	description			string
-	zones       		[]string
-	ticker 				*myTicker
-	currentTick 		uint
-	turnCycle			uint
+	id          string
+	name        string
+	myContext   context.Context
+	description string
+	zones       []string
+	ticker      *myTicker
+	currentTick uint
+	turnCycle   uint
 }
 
 func (w *myWorld) Name() string {
@@ -108,30 +108,43 @@ func (w *myWorld) GetId() string {
 func (w *myWorld) SetId(id string) {
 	w.id = id
 }
+
 func main() {
-	var (
-		w interface{}
-		storage muckity.MuckityStorage
-	)
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	defer cancel()
-	w = &myWorld{
-		"world:descriptive-world",
-		"world",
-		ctx,
-		"I am a test world created for integration testing of the muckity package.",
-		make([]string, 0),
-		createTicker(),
-		0,
-		0 }
-
-	fmt.Println("Created World:", w)
-	storage = muckity.NewMongoStorage(ctx)
-	fmt.Println("Created Storage:", storage)
-	var pers muckity.MuckityPersistent
-	pers = w.(muckity.MuckityPersistent)
-	storage.Save(pers)
-	runLoop(w.(*myWorld))
+	var config = muckity.GetConfig()
+	w := muckity.NewWorld(config)
+	storage := muckity.NewMongoStorage(w.Context())
+	storage.Save(w)
+	fmt.Printf(`World: %v
+ID: %v
+Type: %v
+`, w.Name(), w.GetId(), w.Type())
 }
+
+// To be re-used once contexts are flowing.
+//func main() {
+//	var (
+//		w interface{}
+//		storage muckity.MuckityStorage
+//	)
+//
+//	ctx, cancel := context.WithCancel(context.Background())
+//
+//	defer cancel()
+//	w = &myWorld{
+//		"world:descriptive-world",
+//		"world",
+//		ctx,
+//		"I am a test world created for integration testing of the muckity package.",
+//		make([]string, 0),
+//		createTicker(),
+//		0,
+//		0 }
+//
+//	fmt.Println("Created World:", w)
+//	storage = muckity.NewMongoStorage(ctx)
+//	fmt.Println("Created Storage:", storage)
+//	var pers muckity.MuckityPersistent
+//	pers = w.(muckity.MuckityPersistent)
+//	storage.Save(pers)
+//	runLoop(w.(*myWorld))
+//}
