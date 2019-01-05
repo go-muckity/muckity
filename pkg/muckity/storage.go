@@ -7,17 +7,17 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	url2 "net/url"
-	"os"
-	"strings"
 	"time"
 )
 
 type MongoStorage struct {
-	id				interface{}
-	dbUrl			*url2.URL
-	databaseName 	string
-	parentCtx 	context.Context
+	id           interface{}
+	dbUrl        *url2.URL
+	databaseName string
+	parentCtx    context.Context
 }
+
+var _ MuckitySystem = &MongoStorage{}
 
 // Name implements part of MuckitySystem
 func (ms *MongoStorage) Name() string {
@@ -30,21 +30,22 @@ func (ms *MongoStorage) Type() string {
 }
 
 func (ms *MongoStorage) Context() context.Context {
-	return ms.parentCtx
+	// TODO: utilize context
+	return context.TODO()
 }
 
 func (w *MongoStorage) String() string {
 	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
 }
 
-func (ms MongoStorage) Client() (*mongo.Client, error)  {
+func (ms MongoStorage) Client() (*mongo.Client, error) {
 	var (
-		ctx		context.Context
-		client	*mongo.Client
-		err		error
+		ctx    context.Context
+		client *mongo.Client
+		err    error
 	)
 
-	ctx, _ = context.WithTimeout(ms.parentCtx, time.Second * 30)
+	ctx, _ = context.WithTimeout(ms.parentCtx, time.Second*30)
 	client, err = mongo.NewClient(ms.dbUrl.String())
 	err = client.Connect(ctx)
 	return client, err
@@ -53,18 +54,24 @@ func (ms MongoStorage) Client() (*mongo.Client, error)  {
 // Save implements storage persistence for compatible objects
 func (ms MongoStorage) Save(obj MuckityPersistent) error {
 	var (
-		client	*mongo.Client
-		err 	error
+		client *mongo.Client
+		err    error
+		coll   *mongo.Collection
 	)
 	client, err = ms.Client()
 	if err != nil {
 		// Don't even try
 		return err
 	}
-	coll := client.Database(ms.databaseName).Collection("muckity")
+	// TODO: lookup config object
+	if collName, ok := GetConfig().Get("mongodb.collectionRoot").(string); ok {
+		coll = client.Database(ms.databaseName).Collection(collName)
+	} else {
+		coll = client.Database(ms.databaseName).Collection("muckity")
+	}
 	pd := obj.BSON()
 	opt := newUpsert()
-	var id interface {}
+	var id interface{}
 	id = obj.GetId()
 	if id == "" {
 		id = primitive.NewObjectID()
@@ -85,55 +92,30 @@ func (ms MongoStorage) Save(obj MuckityPersistent) error {
 
 func NewMongoStorage(ctx context.Context) *MongoStorage {
 	var (
-		ms 	MongoStorage
-		url	*url2.URL
+		ms     MongoStorage
+		url    interface{}
+		name   interface{}
+		dbUrl  *url2.URL
+		dbName string
+		err    error
 	)
-	url = parseConfig()
-	pathSplit := strings.Split(url.Path, "/")
-	path := pathSplit[len(pathSplit)-1]
-	ms = MongoStorage{nil, url, path, ctx }
+	// TODO: lookup config object
+	config := GetConfig()
+	config.BindEnv("mongodb.url", "MUCKITY_MONGODB_URL")
+	config.BindEnv("mongodb.name", "MUCKITY_MONGODB_NAME")
+	url = config.Get("mongodb.url")
+	name = config.Get("mongodb.name")
+	if parse, ok := url.(string); ok {
+		dbUrl, err = url2.Parse(parse)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if name, ok := name.(string); ok {
+		dbName = name
+	} else {
+		panic("mongodb.name or MUCKITY_MONGODB_NAME must be set")
+	}
+	ms = MongoStorage{nil, dbUrl, dbName, ctx}
 	return &ms
 }
-
-// TODO: use a real config service
-func parseConfig() *url2.URL {
-	var (
-		dbUser	string
-		dbPwd	string
-		dbHost	string
-		dbName	string
-		url 	*url2.URL
-	)
-
-	if value, ok := os.LookupEnv("MUCKITY_DB_USERNAME"); ok {
-		dbUser = value
-	} else {
-		dbUser = "muckity"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_PWD"); ok {
-		dbPwd = value
-	} else {
-		dbPwd = "muckity"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_HOST"); ok {
-		dbHost = value
-	} else {
-		dbHost = "localhost"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_PORT"); ok {
-		dbHost = fmt.Sprintf("%v:%v", dbHost, value)
-	} else {
-		dbHost = fmt.Sprintf("%v:27017", dbHost)
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_NAME"); ok {
-		dbName = value
-	} else {
-		dbName = "muckity"
-	}
-	url, err := url2.Parse(fmt.Sprintf("mongodb://%v:%v@%v/%v", dbUser, dbPwd, dbHost, dbName))
-	if err != nil {
-		panic(err)
-	}
-	return url
-}
-

@@ -7,11 +7,14 @@ import (
 )
 
 type World struct {
-	id					interface{}
-	name				string
-	mType 				string
-	parentCtx			context.Context
+	id        interface{}
+	name      string
+	mType     string
+	parentCtx context.Context
+	systems   []MuckitySystemRef
 }
+
+var _ MuckitySystem = &World{}
 
 func (w *World) Name() string {
 	return w.name
@@ -22,15 +25,39 @@ func (w *World) Type() string {
 }
 
 func (w *World) Context() context.Context {
-	return w.parentCtx
+	// TODO: utilize context
+	return context.TODO()
 }
 
 func (w *World) String() string {
 	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
 }
 
-func NewWorld() *World {
-	return &World{ nil,"name", "muckity:world", context.Background() }
+func (w *World) AddSystems(systems ...MuckitySystem) {
+	for _, system := range systems {
+		sysRef := new(MuckitySystemRef)
+		sysRef.system = system
+		w.systems = append(w.systems, *sysRef)
+	}
+}
+
+// NewWorld returns an instance of World, attaching instances of MuckitySystems passed in after config
+func NewWorld(config MuckityConfig, systems ...MuckitySystem) *World {
+	var w = new(World)
+	// TODO: utilize context
+	w.parentCtx = context.Background()
+	w.mType = "world"
+	config.BindEnv("world.name", "MUCKITY_WORLD_NAME")
+	if name, ok := config.Get("world.name").(string); ok {
+		w.name = name
+	} else {
+		w.name = "" // Blank name or config tests would be pointless...
+	}
+	if len(systems) > 0 {
+		w.AddSystems(systems...)
+	}
+	w.id = fmt.Sprintf("%v:%v", w.Type(), w.Name())
+	return w
 }
 
 func (w *World) BSON() interface{} {
