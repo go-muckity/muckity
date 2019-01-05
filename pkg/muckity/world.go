@@ -1,43 +1,59 @@
 package muckity
 
 import (
+	"context"
 	"fmt"
-	"github.com/machiel/slugify"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
-type MuckityWorld struct {
-	name string
+type World struct {
+	id					interface{}
+	name				string
+	mType 				string
+	parentCtx			context.Context
 }
 
-func (w MuckityWorld) Name() string {
+func (w *World) Name() string {
 	return w.name
 }
 
-func (w MuckityWorld) Type() string {
-	return "worlds"
+func (w *World) Type() string {
+	return w.mType
 }
 
-func (w MuckityWorld) Aliases() []string {
-	return make([]string, 0)
+func (w *World) Context() context.Context {
+	return w.parentCtx
 }
 
-func (w MuckityWorld) DBId() string {
-	return fmt.Sprintf("world:%v", slugify.Slugify(w.name))
+func (w *World) String() string {
+	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
 }
 
-func (w MuckityWorld) Metadata() interface{} {
-	return w.PersistentData()
+func NewWorld() *World {
+	return &World{ nil,"name", "muckity:world", context.Background() }
 }
 
-func (w MuckityWorld) PersistentData() interface{} {
+func (w *World) BSON() interface{} {
 	p := bson.D{
 		{"$set", bson.D{
 			{
 				"name",
 				w.Name(),
 			},
+			{
+				"type",
+				w.Type(),
+			},
 		}},
 	}
 	return p
+}
+
+func (w *World) GetId() string {
+	// TODO: needs better checking
+	return w.id.(fmt.Stringer).String()
+}
+
+func (w *World) SetId(id string) {
+	w.id = id
 }
