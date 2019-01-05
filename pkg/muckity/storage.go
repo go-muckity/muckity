@@ -13,8 +13,8 @@ import (
 type MongoStorage struct {
 	id				interface{}
 	dbUrl			*url2.URL
-	databaseName 	string
-	parentCtx 	context.Context
+	databaseName	string
+	parentCtx		context.Context
 }
 
 var _ MuckitySystem = &MongoStorage{}
@@ -92,7 +92,6 @@ func NewMongoStorage(ctx context.Context) *MongoStorage {
 		dbName string
 		err error
 	)
-	//url = parseConfig()
 	config := GetConfig()
 	config.BindEnv("mongodb.url", "MUCKITY_MONGODB_URL")
 	config.BindEnv("mongodb.name", "MUCKITY_MONGODB_NAME")
