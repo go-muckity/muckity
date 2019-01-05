@@ -7,8 +7,6 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	url2 "net/url"
-	"os"
-	"strings"
 	"time"
 )
 
@@ -18,6 +16,8 @@ type MongoStorage struct {
 	databaseName 	string
 	parentCtx 	context.Context
 }
+
+var _ MuckitySystem = &MongoStorage{}
 
 // Name implements part of MuckitySystem
 func (ms *MongoStorage) Name() string {
@@ -86,54 +86,29 @@ func (ms MongoStorage) Save(obj MuckityPersistent) error {
 func NewMongoStorage(ctx context.Context) *MongoStorage {
 	var (
 		ms 	MongoStorage
-		url	*url2.URL
+		url interface{}
+		name interface{}
+		dbUrl *url2.URL
+		dbName string
+		err error
 	)
-	url = parseConfig()
-	pathSplit := strings.Split(url.Path, "/")
-	path := pathSplit[len(pathSplit)-1]
-	ms = MongoStorage{nil, url, path, ctx }
+	//url = parseConfig()
+	config := GetConfig()
+	config.BindEnv("mongodb.url", "MUCKITY_MONGODB_URL")
+	config.BindEnv("mongodb.name", "MUCKITY_MONGODB_NAME")
+	url = config.Get("mongodb.url")
+	name = config.Get("mongodb.name")
+	if parse, ok := url.(string); ok {
+		dbUrl, err = url2.Parse(parse)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if name, ok := name.(string); ok {
+		dbName = name
+	} else {
+		panic("mongodb.name or MUCKITY_MONGODB_NAME must be set")
+	}
+	ms = MongoStorage{nil, dbUrl, dbName, ctx }
 	return &ms
 }
-
-// TODO: use a real config service
-func parseConfig() *url2.URL {
-	var (
-		dbUser	string
-		dbPwd	string
-		dbHost	string
-		dbName	string
-		url 	*url2.URL
-	)
-
-	if value, ok := os.LookupEnv("MUCKITY_DB_USERNAME"); ok {
-		dbUser = value
-	} else {
-		dbUser = "muckity"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_PWD"); ok {
-		dbPwd = value
-	} else {
-		dbPwd = "muckity"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_HOST"); ok {
-		dbHost = value
-	} else {
-		dbHost = "localhost"
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_PORT"); ok {
-		dbHost = fmt.Sprintf("%v:%v", dbHost, value)
-	} else {
-		dbHost = fmt.Sprintf("%v:27017", dbHost)
-	}
-	if value, ok := os.LookupEnv("MUCKITY_DB_NAME"); ok {
-		dbName = value
-	} else {
-		dbName = "muckity"
-	}
-	url, err := url2.Parse(fmt.Sprintf("mongodb://%v:%v@%v/%v", dbUser, dbPwd, dbHost, dbName))
-	if err != nil {
-		panic(err)
-	}
-	return url
-}
-
