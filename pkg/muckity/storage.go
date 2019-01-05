@@ -18,6 +18,7 @@ type MongoStorage struct {
 }
 
 var _ MuckitySystem = &MongoStorage{}
+var _ MuckityStorage = &MongoStorage{}
 
 // Name implements part of MuckitySystem
 func (ms *MongoStorage) Name() string {
