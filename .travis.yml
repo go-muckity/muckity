@@ -23,6 +23,7 @@ before_install:
 - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install 8.14.0
 
 script:
+- cp example.muckity.yml muckity.yml
 - go test -v ./...
 - go run game.go
 - npm install
