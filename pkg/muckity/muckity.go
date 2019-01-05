@@ -43,13 +43,21 @@ type MuckityPersistent interface {
 	GetId() string
 	// SetId accepts a string and applies it to the receiver for retrieval by GetId()
 	SetId(key string)
-	MuckityType
 }
 
 // MuckityWorld models the implementation of a central management system; a "world" in mu* terms
 type MuckityWorld interface {
 	AddSystems(systems ...MuckitySystem)
+	GetSystem(name string) MuckitySystemRef
+	GetSystems() []MuckitySystemRef
 	MuckitySystem
+	// MuckityPersistent is included to require some kind of persistence modeling on worlds; can use
+	// simple implementations:
+	//
+	// func (w *worldStruct) BSON() interface{} { var iface interface{}; return iface }
+	// func (w *worldStruct) GetId() string { return "my-world-id" }
+	// func (w *worldStruct) SetID(key string) { return }
+	MuckityPersistent
 }
 
 // MuckityStorage implements base storage system, de-coupled from object persistence and configuration

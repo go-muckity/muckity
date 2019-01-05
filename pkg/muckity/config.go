@@ -74,6 +74,7 @@ func newConfig() *muckityConfig {
 }
 
 func GetConfig() MuckityConfig {
+	// TODO: Implement per TODO in storage/world
 	once.Do(func() {
 		instance = newConfig()
 	})

@@ -15,7 +15,7 @@ type World struct {
 	systems   []MuckitySystemRef
 }
 
-var _ MuckitySystem = &World{}
+var _ MuckityWorld = &World{}
 
 func (w *World) Name() string {
 	return w.name
@@ -36,6 +36,7 @@ func (w *World) String() string {
 
 func (w *World) AddSystems(systems ...MuckitySystem) {
 	for _, system := range systems {
+		fmt.Println("Adding system: ", system.Name())
 		sysRef := new(MuckitySystemRef)
 		sysRef.system = system
 		w.systems = append(w.systems, *sysRef)
@@ -44,23 +45,18 @@ func (w *World) AddSystems(systems ...MuckitySystem) {
 
 var _ MuckityWorld = &World{}
 
-// NewWorld returns an instance of World, attaching instances of MuckitySystems passed in after config
-func NewWorld(config MuckityConfig, systems ...MuckitySystem) *World {
-	var w = new(World)
-	// TODO: utilize context
-	w.parentCtx = context.Background()
-	w.mType = "world"
-	config.BindEnv("world.name", "MUCKITY_WORLD_NAME")
-	if name, ok := config.Get("world.name").(string); ok {
-		w.name = name
-	} else {
-		w.name = "" // Blank name or config tests would be pointless...
+func (w *World) GetSystem(name string) MuckitySystemRef {
+	var ref MuckitySystemRef
+	for _, ref = range w.systems {
+		if ref.GetSystem().Name() == name {
+			return ref
+		}
 	}
-	if len(systems) > 0 {
-		w.AddSystems(systems...)
-	}
-	w.id = fmt.Sprintf("%v:%v", w.Type(), w.Name())
-	return w
+	panic("Could not find requested system! Try using GetSystems")
+}
+
+func (w *World) GetSystems() []MuckitySystemRef {
+	return w.systems
 }
 
 func (w *World) BSON() interface{} {
@@ -86,4 +82,38 @@ func (w *World) GetId() string {
 
 func (w *World) SetId(id string) {
 	w.id = id
+}
+
+func GetWorld(ctx ...interface{}) MuckityWorld {
+	var (
+		wCtx    context.Context
+		world   MuckityWorld
+		storage MuckityStorage
+	)
+	if len(ctx) < 2 {
+		// TODO: utilize context
+		wCtx = context.Background()
+		world = &World{nil, "descriptive-world", "world", wCtx, make([]MuckitySystemRef, 0)}
+		storage = GetStorage(wCtx)
+		if len(ctx) == 0 {
+			world.AddSystems(GetConfig(), storage)
+		}
+		if len(ctx) == 1 {
+			switch v := ctx[0].(type) {
+			case string:
+				world = &World{nil, v, "world", wCtx, make([]MuckitySystemRef, 0)}
+			case MuckityConfig:
+				// Required config model is directly passed
+				world.AddSystems(v)
+				world.AddSystems(storage)
+			case MuckityWorld:
+				world = v
+			default:
+				panic("Unknown interface passed to GetWorld()")
+			}
+		}
+		world.SetId(fmt.Sprintf("%v:%v", world.Type(), world.Name()))
+	}
+	storage.Save(world)
+	return world
 }
