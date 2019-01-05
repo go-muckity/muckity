@@ -18,10 +18,11 @@ type MongoStorage struct {
 }
 
 var _ MuckitySystem = &MongoStorage{}
+var _ MuckityStorage = &MongoStorage{}
 
 // Name implements part of MuckitySystem
 func (ms *MongoStorage) Name() string {
-	return fmt.Sprintf("mongodb:%v:%v", ms.dbUrl.Host, ms.dbUrl.Path)
+	return fmt.Sprintf("mongodb:%v:%v%v", ms.dbUrl.Host, ms.dbUrl.Path, ms.databaseName)
 }
 
 // Type implements part of MuckitySystem
@@ -118,4 +119,33 @@ func NewMongoStorage(ctx context.Context) *MongoStorage {
 	}
 	ms = MongoStorage{nil, dbUrl, dbName, ctx}
 	return &ms
+}
+
+func GetStorage(ctx ...interface{}) MuckityStorage {
+	var ms MuckityStorage
+	if len(ctx) == 0 {
+		return NewMongoStorage(context.TODO())
+	}
+	if len(ctx) == 1 {
+		switch v := ctx[0].(type) {
+		case MuckityWorld:
+			sRef := v.GetSystem("storage")
+			system := sRef.GetSystem()
+			if system, ok := system.(MuckityStorage); ok {
+				ms = system
+			}
+		case context.Context:
+			ms = NewMongoStorage(v)
+		default:
+			panic(fmt.Sprintf("Unimplemented context for GetStorage(): %v", v))
+		}
+		return ms
+	}
+	// TODO: Implement system struct ptr + ctx; needs SetContext() added to MuckitySystem first
+	// Should be something like a filter chain:
+	// cast to MuckitySystem
+	// 		cast to MuckityStorage
+	// 			SetContext()
+	// 			return
+	panic("Too many arguments passed to GetStorage()")
 }
