@@ -118,7 +118,7 @@ func main() {
 
 	defer cancel()
 	w = &myWorld{
-		"",
+		"world:descriptive-world",
 		"world",
 		ctx,
 		"I am a test world created for integration testing of the muckity package.",

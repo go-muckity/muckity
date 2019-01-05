@@ -25,11 +25,11 @@ client.connect(function(err) {
 });
 
 const checkWorldDocument = function(db, callback) {
-    const collection = db.collection('worlds');
-    collection.find({'_id': 'world:descriptive-aliased-world'}).toArray(function(err, docs) {
+    const collection = db.collection('muckity');
+    collection.find({'_id': 'world:descriptive-world'}).toArray(function(err, docs) {
         assert.equal(err, null);
         const wdoc = docs[0];
-        assert.equal(wdoc["name"], "Descriptive, aliased, world");
+        assert.equal(wdoc["name"], "world");
         callback(docs)
     });
 };
