@@ -110,14 +110,21 @@ func (w *myWorld) SetId(id string) {
 }
 
 func main() {
+	var w muckity.MuckityWorld
 	var config = muckity.GetConfig()
-	w := muckity.NewWorld(config)
+	var worldId string
+	w = muckity.NewWorld(config)
 	storage := muckity.NewMongoStorage(w.Context())
-	storage.Save(w)
+	w.AddSystems(storage)
+	if w, ok := w.(muckity.MuckityPersistent); ok {
+		storage.Save(w)
+		worldId = w.GetId()
+	}
 	fmt.Printf(`World: %v
 ID: %v
 Type: %v
-`, w.Name(), w.GetId(), w.Type())
+`, w.Name(), worldId, w.Type())
+	//for _, system := w.
 }
 
 // To be re-used once contexts are flowing.

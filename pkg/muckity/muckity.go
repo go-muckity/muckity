@@ -46,10 +46,16 @@ type MuckityPersistent interface {
 	MuckityType
 }
 
+// MuckityWorld models the implementation of a central management system; a "world" in mu* terms
+type MuckityWorld interface {
+	AddSystems(systems ...MuckitySystem)
+	MuckitySystem
+}
+
 // MuckityStorage implements base storage system, de-coupled from object persistence and configuration
 type MuckityStorage interface {
 	// Save object to storage provider; returns an error if anything failed
-	// TODO: implement this better; move Save() to the MuckityPersistent, which calls a different function, defined here
+	// TODO: implement this better; move Save() to the MuckityPersistent interface; create GetStorage() on MuckityWorld
 	Save(obj MuckityPersistent) error
 	MuckitySystem
 }

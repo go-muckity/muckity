@@ -6,6 +6,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
+// World is the default implementation of MuckityWorld
 type World struct {
 	id        interface{}
 	name      string
@@ -40,6 +41,8 @@ func (w *World) AddSystems(systems ...MuckitySystem) {
 		w.systems = append(w.systems, *sysRef)
 	}
 }
+
+var _ MuckityWorld = &World{}
 
 // NewWorld returns an instance of World, attaching instances of MuckitySystems passed in after config
 func NewWorld(config MuckityConfig, systems ...MuckitySystem) *World {
