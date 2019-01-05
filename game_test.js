@@ -29,7 +29,7 @@ const checkWorldDocument = function(db, callback) {
     collection.find({'_id': 'world:descriptive-world'}).toArray(function(err, docs) {
         assert.equal(err, null);
         const wdoc = docs[0];
-        assert.equal(wdoc["name"], "world");
+        assert.equal(wdoc["name"], "descriptive-world");
         callback(docs)
     });
 };
