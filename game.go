@@ -1,14 +1,12 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"fmt"
-	"github.com/machiel/slugify"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/tsal/muckity/pkg/muckity"
 	"time"
 )
-
 
 const Turn = muckity.Tertia * 20
 const SimpleAction = Turn
@@ -56,37 +54,33 @@ func runLoop(w *myWorld) error {
 }
 
 type myWorld struct {
-	name        string
-	description string
-	zones       []string
-	ticker 		*myTicker
-	currentTick uint
-	turnCycle	uint
+	id					string
+	name				string
+	myContext			context.Context
+	description			string
+	zones       		[]string
+	ticker 				*myTicker
+	currentTick 		uint
+	turnCycle			uint
 }
 
-func (w myWorld) Name() string {
+func (w *myWorld) Name() string {
 	return w.name
 }
 
-func (w myWorld) Type() string {
-	return "worlds"
+func (w *myWorld) Type() string {
+	return "game:world"
 }
 
-func (w myWorld) Aliases() []string {
-	s := make([]string, 0)
-	s = append(s, "something")
-	return s
+func (w *myWorld) Context() context.Context {
+	return w.myContext
 }
 
-func (w myWorld) DBId() string {
-	return fmt.Sprintf("world:%v", slugify.Slugify(w.name))
+func (w *myWorld) String() string {
+	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
 }
 
-func (w myWorld) Metadata() interface{} {
-	return w.PersistentData()
-}
-
-func (w myWorld) PersistentData() interface{} {
+func (w *myWorld) BSON() interface{} {
 	p := bson.D{
 		{"$set", bson.D{
 			{
@@ -101,32 +95,43 @@ func (w myWorld) PersistentData() interface{} {
 				"zones",
 				w.zones,
 			},
-			{
-				"aliases",
-				w.Aliases(),
-			},
 		}},
 	}
 	return p
 }
 
+func (w *myWorld) GetId() string {
+	// TODO: needs better checking
+	return w.id
+}
+
+func (w *myWorld) SetId(id string) {
+	w.id = id
+}
 func main() {
-	core := muckity.Init()
-	w := new(myWorld)
-	w.name = "Descriptive, aliased, world"
-	w.description = "I am a test world created for integration testing of the muckity package."
-	w.zones = make([]string, 0)
-	store, err := core.GetSystem("storage")
-	if err != nil {
-		panic(err)
-	}
-	if store, ok := store.(*muckity.MuckityStorage); ok {
-		_, err := store.Save(w)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		panic(errors.New(fmt.Sprintf("Storage error, uknown storage object: %v", store)))
-	}
-	runLoop(w)
+	var (
+		w interface{}
+		storage muckity.MuckityStorage
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	defer cancel()
+	w = &myWorld{
+		"",
+		"world",
+		ctx,
+		"I am a test world created for integration testing of the muckity package.",
+		make([]string, 0),
+		createTicker(),
+		0,
+		0 }
+
+	fmt.Println("Created World:", w)
+	storage = muckity.NewMongoStorage(ctx)
+	fmt.Println("Created Storage:", storage)
+	var pers muckity.MuckityPersistent
+	pers = w.(muckity.MuckityPersistent)
+	storage.Save(pers)
+	runLoop(w.(*myWorld))
 }
