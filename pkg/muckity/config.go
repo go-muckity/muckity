@@ -7,14 +7,7 @@ import (
 	"sync"
 )
 
-// Config defines muckity config interface on top of viper
-type Config interface {
-	Get(k string) interface{}
-	Set(k string, v interface{})
-	BindEnv(input ...string) error
-	MuckitySystem
-}
-
+// not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
 	config			*viper.Viper
 }
@@ -55,7 +48,8 @@ func (c muckityConfig) Dump() string {
 	return string(bs)
 }
 
-var _ Config = &muckityConfig{}
+var _ MuckityConfig = &muckityConfig{}
+var _ MuckitySystem = &muckityConfig{}
 
 var instance *muckityConfig
 
@@ -78,7 +72,7 @@ func newConfig() *muckityConfig {
 	return &mc
 }
 
-func GetConfig() Config {
+func GetConfig() MuckityConfig {
 	once.Do(func() {
 		instance = newConfig()
 	})
