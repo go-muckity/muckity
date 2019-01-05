@@ -51,7 +51,7 @@ func (w *World) BSON() interface{} {
 
 func (w *World) GetId() string {
 	// TODO: needs better checking
-	return w.id.(fmt.Stringer).String()
+	return fmt.Sprintf("%v", w.id)
 }
 
 func (w *World) SetId(id string) {
