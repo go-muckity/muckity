@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	url2 "net/url"
 	"os"
@@ -63,9 +64,14 @@ func (ms MongoStorage) Save(obj MuckityPersistent) error {
 	coll := client.Database(ms.databaseName).Collection("muckity")
 	pd := obj.BSON()
 	opt := newUpsert()
+	var id interface {}
+	id = obj.GetId()
+	if id == "" {
+		id = primitive.NewObjectID()
+	}
 	filter := bson.D{{
 		"_id",
-		obj.GetId(),
+		id,
 	}}
 	res, err := coll.UpdateOne(ms.Context(), filter, pd, &opt)
 	if err != nil {
