@@ -9,7 +9,7 @@ import (
 
 // not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
-	config			*viper.Viper
+	config *viper.Viper
 }
 
 func (c *muckityConfig) Name() string {
@@ -36,6 +36,7 @@ func (c *muckityConfig) BindEnv(input ...string) error {
 }
 
 func (c *muckityConfig) Context() context.Context {
+	// TODO: utilize context
 	return context.TODO()
 }
 
@@ -78,4 +79,3 @@ func GetConfig() MuckityConfig {
 	})
 	return instance
 }
-

@@ -27,6 +27,14 @@ type MuckitySystem interface {
 	MuckityType
 }
 
+type MuckitySystemRef struct {
+	system MuckitySystem
+}
+
+func (msr MuckitySystemRef) GetSystem() MuckitySystem {
+	return msr.system
+}
+
 // MuckityPersistent is an interface for persisting items, de-coupled from storage system
 type MuckityPersistent interface {
 	// BSON returns bson primitives; should be re-usable to generate JSON, for example
@@ -54,7 +62,5 @@ type MuckityConfig interface {
 	MuckitySystem
 }
 
-
 // Tertia is the next division down from a second; it's also a tick
 const Tertia = time.Second / 60
-
