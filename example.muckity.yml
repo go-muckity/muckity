@@ -2,4 +2,7 @@ version: 0
 mongodb:
   url: "mongodb://muckity:muckity@localhost:27017/"
   name: "muckity"
-  collectionPrefix: "muckity"
+  collectionRoot: "muckity"
+world:
+  name: "descriptive-world"
+  storage: mongodb
