@@ -41,7 +41,6 @@ type MuckityStorage interface {
 	MuckitySystem
 }
 
-
 // Tertia is the next division down from a second; it's also a tick
 const Tertia = time.Second / 60
 
