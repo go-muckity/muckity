@@ -36,7 +36,6 @@ func (w *World) String() string {
 
 func (w *World) AddSystems(systems ...MuckitySystem) {
 	for _, system := range systems {
-		fmt.Println("Adding system: ", system.Name())
 		sysRef := new(MuckitySystemRef)
 		sysRef.system = system
 		w.systems = append(w.systems, *sysRef)
@@ -114,6 +113,6 @@ func GetWorld(ctx ...interface{}) MuckityWorld {
 		}
 		world.SetId(fmt.Sprintf("%v:%v", world.Type(), world.Name()))
 	}
-	storage.Save(world)
+	storage.Save(world) // nop if storage isn't defined.
 	return world
 }
