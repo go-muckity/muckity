@@ -12,4 +12,4 @@
 *.out
 
 # Node stuff
-node_modules/
+test/node_modules/
