@@ -23,7 +23,7 @@ script:
 - cp example.muckity.yml muckity.yml
 - go test -v ./...
 - go run main.go
-- cd node && npm install && npm run test
+- cd test && npm install && npm run test
 
 cache:
   directories:
