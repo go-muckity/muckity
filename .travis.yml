@@ -25,7 +25,7 @@ before_install:
 script:
 - cp example.muckity.yml muckity.yml
 - go test -v ./...
-- go run game.go
+- go run main.go
 - npm install
 - npm run test
 
