@@ -5,4 +5,4 @@ mongodb:
   collectionRoot: "muckity"
 world:
   name: "descriptive-world"
-  storage: mongodb
+  storage: "muckity:storage"

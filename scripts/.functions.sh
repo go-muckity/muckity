@@ -8,7 +8,10 @@ export MONGO_EXPRESS_VERSION=${MONGO_EXPRESS_VERSION:-0.49}
 _cleanup() {
     docker rmi -f muckity:local-dev || echo "no muckity:local-dev to remove"
     if [ "$DEV_MONGO" = "docker" ]; then
-        docker-compose -f dev-stack.yml down
+        if [ "$TRAVIS_BUILD_NUMBER" != "" ]; then
+            COMPOSE_PROJECT_NAME=muckity_travis
+        fi
+        docker-compose -f docker/dev-stack.yml down
     fi
 }
 
@@ -19,5 +22,5 @@ _make_mongodb() {
     if [ "$TRAVIS_BUILD_NUMBER" != "" ]; then
         COMPOSE_PROJECT_NAME=muckity_travis
     fi
-    docker-compose -f dev-stack.yml up $@
+    docker-compose -f docker/dev-stack.yml up $@
 }
