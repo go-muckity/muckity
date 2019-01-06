@@ -88,7 +88,7 @@ func (w *myWorld) Type() string {
 	return "world"
 }
 
-func (w *myWorld) Context() context.Context {
+func (w *myWorld) Context() ecs.MuckityContext {
 	return w.myContext
 }
 

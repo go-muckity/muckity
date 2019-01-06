@@ -1,7 +1,6 @@
 package ecs
 
 import (
-	"context"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
@@ -11,7 +10,7 @@ type World struct {
 	id        interface{}
 	name      string
 	mType     string
-	parentCtx context.Context
+	parentCtx MuckityContext
 	systems   []MuckitySystemRef
 }
 
@@ -25,9 +24,9 @@ func (w *World) Type() string {
 	return w.mType
 }
 
-func (w *World) Context() context.Context {
+func (w *World) Context() MuckityContext {
 	// TODO: utilize context
-	return context.TODO()
+	return w.parentCtx
 }
 
 func (w *World) String() string {
@@ -85,13 +84,13 @@ func (w *World) SetId(id string) {
 
 func GetWorld(ctx ...interface{}) MuckityWorld {
 	var (
-		wCtx    context.Context
+		wCtx    MuckityContext
 		world   MuckityWorld
 		storage MuckityStorage
 	)
 	if len(ctx) < 2 {
 		// TODO: utilize context
-		wCtx = context.Background()
+		wCtx = Background()
 		world = &World{nil, "descriptive-world", "world", wCtx, make([]MuckitySystemRef, 0)}
 		storage = GetStorage(wCtx)
 		if len(ctx) == 0 {
