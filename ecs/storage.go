@@ -1,4 +1,4 @@
-package muckity
+package ecs
 
 import (
 	"context"
