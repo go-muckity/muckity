@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/tsal/muckity/pkg/muckity"
+	"github.com/go-muckity/muckity/muckity"
 	"time"
 )
 
