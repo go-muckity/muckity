@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/go-muckity/muckity/ecs"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"time"
 )
 
@@ -136,7 +136,6 @@ func main() {
 		"dull",
 		make([]string, 0), createTicker(), 0, 0})
 
-
 	fmt.Printf(`World: %v
 ID: %v
 Type: %v
@@ -146,12 +145,12 @@ Type: %v
 	fmt.Println("BSON: ", w.BSON())
 	storage := ecs.GetStorage(w.Context())
 	w.AddSystems(storage) // does nothing
-	storage.Save(w) // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
+	storage.Save(w)       // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
 
 	w2 = ecs.GetWorld()
 	for _, system := range w2.GetSystems() {
 		if system.GetSystem().Type() == "muckity:storage" {
-			fmt.Println("Storage loaded from world: ", system.GetSystem().Type())  // prints nothing
+			fmt.Println("Storage loaded from world: ", system.GetSystem().Type()) // prints nothing
 			if storage, ok := system.GetSystem().(ecs.MuckityStorage); ok {
 				storage.Save(w)
 			}
