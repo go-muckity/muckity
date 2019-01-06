@@ -24,7 +24,7 @@ func createTicker() *myTicker {
 	t.tertia = time.NewTicker(muckity.Tertia).C
 	t.turn = time.NewTicker(Turn).C
 	// TODO: use real communications instead of a death timer
-	timeout := time.After(time.Second * 10)
+	timeout := time.After(time.Second * 2)
 	t.done = make(chan interface{})
 	go func() {
 		<-timeout
@@ -34,6 +34,7 @@ func createTicker() *myTicker {
 }
 
 func runLoop(w *myWorld) error {
+	fmt.Println("Creating ticker..")
 	w.ticker = createTicker()
 	for {
 		select {
@@ -64,12 +65,27 @@ type myWorld struct {
 	turnCycle   uint
 }
 
+var _ muckity.MuckityWorld = &myWorld{}
+
+func (w *myWorld) AddSystems(systems ...muckity.MuckitySystem) {
+	return
+}
+
+func (w *myWorld) GetSystems() []muckity.MuckitySystemRef {
+	var ms = make([]muckity.MuckitySystemRef, 0)
+	return ms
+}
+func (w *myWorld) GetSystem(name string) muckity.MuckitySystemRef {
+	var ms muckity.MuckitySystemRef
+	return ms
+}
+
 func (w *myWorld) Name() string {
 	return w.name
 }
 
 func (w *myWorld) Type() string {
-	return "game:world"
+	return "world"
 }
 
 func (w *myWorld) Context() context.Context {
@@ -111,40 +127,36 @@ func (w *myWorld) SetId(id string) {
 
 func main() {
 	var w muckity.MuckityWorld
-	w = muckity.GetWorld()
+	var w2 muckity.MuckityWorld
+
+	w = muckity.GetWorld(&myWorld{
+		"world:myMuckityWorld",
+		"myMuckityWorld",
+		context.TODO(),
+		"dull",
+		make([]string, 0), createTicker(), 0, 0})
+
 
 	fmt.Printf(`World: %v
 ID: %v
 Type: %v
 `, w.Name(), w.GetId(), w.Type())
-	//for _, system := w.
-}
 
-// To be re-used once contexts are flowing.
-//func main() {
-//	var (
-//		w interface{}
-//		storage muckity.MuckityStorage
-//	)
-//
-//	ctx, cancel := context.WithCancel(context.Background())
-//
-//	defer cancel()
-//	w = &myWorld{
-//		"world:descriptive-world",
-//		"world",
-//		ctx,
-//		"I am a test world created for integration testing of the muckity package.",
-//		make([]string, 0),
-//		createTicker(),
-//		0,
-//		0 }
-//
-//	fmt.Println("Created World:", w)
-//	storage = muckity.NewMongoStorage(ctx)
-//	fmt.Println("Created Storage:", storage)
-//	var pers muckity.MuckityPersistent
-//	pers = w.(muckity.MuckityPersistent)
-//	storage.Save(pers)
-//	runLoop(w.(*myWorld))
-//}
+	go runLoop(w.(*myWorld))
+	fmt.Println("BSON: ", w.BSON())
+	storage := muckity.GetStorage(w.Context())
+	w.AddSystems(storage) // does nothing
+	storage.Save(w) // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
+
+	w2 = muckity.GetWorld()
+	for _, system := range w2.GetSystems() {
+		if system.GetSystem().Type() == "muckity:storage" {
+			fmt.Println("Storage loaded from world: ", system.GetSystem().Type())  // prints nothing
+			if storage, ok := system.GetSystem().(muckity.MuckityStorage); ok {
+				storage.Save(w)
+			}
+		}
+	}
+	fmt.Println("World named: ", w2.Name())
+	time.Sleep(time.Second * 5)
+}
