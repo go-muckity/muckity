@@ -85,6 +85,16 @@ type MuckityContext interface {
 	Err() error
 	// Value implemented per context.Value()
 	Value(key interface{}) interface{}
+	// Root() returns MuckityType
+	Root() MuckityType
+	// Config() returns MuckityConfig
+	Config() MuckityConfig
+	// World() returns MuckityWorld
+	World() MuckityWorld
+	// Storage() returns MuckityStorage
+	Storage() MuckityStorage
+	// System() returns MuckitySystem
+	CallingSystem() MuckitySystem
 }
 
 // Tertia is the next division down from a second; it's also a tick
