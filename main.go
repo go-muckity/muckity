@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/go-muckity/muckity/ecs"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -57,7 +56,7 @@ func runLoop(w *myWorld) error {
 type myWorld struct {
 	id          string
 	name        string
-	myContext   context.Context
+	myContext   ecs.MuckityContext
 	description string
 	zones       []string
 	ticker      *myTicker
@@ -132,7 +131,7 @@ func main() {
 	w = ecs.GetWorld(&myWorld{
 		"world:myMuckityWorld",
 		"myMuckityWorld",
-		context.TODO(),
+		ecs.TODO(),
 		"dull",
 		make([]string, 0), createTicker(), 0, 0})
 
