@@ -34,8 +34,8 @@ func (ms *MongoStorage) Context() MuckityContext {
 	return TODO()
 }
 
-func (w *MongoStorage) String() string {
-	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
+func (ms *MongoStorage) String() string {
+	return fmt.Sprintf("%v:%v", ms.Type(), ms.Name())
 }
 
 func (ms MongoStorage) Client() (*mongo.Client, error) {
