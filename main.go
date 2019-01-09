@@ -128,7 +128,7 @@ func main() {
 	var w ecs.MuckityWorld
 	var w2 ecs.MuckityWorld
 
-	w = ecs.GetWorld(&myWorld{
+	w = ecs.GetWorld(false, &myWorld{
 		"world:myMuckityWorld",
 		"myMuckityWorld",
 		ecs.TODO(),
@@ -146,7 +146,7 @@ Type: %v
 	w.AddSystems(storage) // does nothing
 	storage.Save(w)       // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
 
-	w2 = ecs.GetWorld()
+	w2 = ecs.GetWorld(false)
 	for _, system := range w2.GetSystems() {
 		if system.GetSystem().Type() == "muckity:storage" {
 			fmt.Println("Storage loaded from world: ", system.GetSystem().Type()) // prints nothing

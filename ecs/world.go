@@ -82,7 +82,7 @@ func (w *World) SetId(id string) {
 	w.id = id
 }
 
-func GetWorld(ctx ...interface{}) MuckityWorld {
+func GetWorld(doOnce bool, ctx ...interface{}) MuckityWorld {
 	var (
 		wCtx    MuckityContext
 		world   MuckityWorld

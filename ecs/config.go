@@ -8,8 +8,8 @@ import (
 
 // not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
-	config *viper.Viper
-	parentCtx		MuckityContext
+	config    *viper.Viper
+	parentCtx MuckityContext
 }
 
 func (c *muckityConfig) Name() string {
@@ -72,7 +72,7 @@ func newConfig(ctx ...interface{}) *muckityConfig {
 	if err != nil {
 		panic(err)
 	}
-	mc.config.WatchConfig()
+	mc.config.WatchConfig() // TODO: see if there is a way to implement this with a websocket
 	return &mc
 }
 

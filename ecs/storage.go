@@ -120,6 +120,12 @@ func NewMongoStorage(ctx MuckityContext) *MongoStorage {
 	return &ms
 }
 
+// GetStorage creates a configured and contextualized storage object. It takes any number of parameters, but currently
+// only accepts 0 or 1.  With 0 it will return the default storage object (until 0.1.0, MongoStorage).
+// With 1, it expects either a MuckityWorld (a parent that has a system named "storage" on it), or a MuckityContext.
+// TODO: Implement passing the system name with the World object, to allow for another storage name.
+// TODO: Implement passing a MuckityStorage object
+// TODO: Implement bool for Once()
 func GetStorage(ctx ...interface{}) MuckityStorage {
 	var ms MuckityStorage
 	if len(ctx) == 0 {
