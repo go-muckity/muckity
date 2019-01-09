@@ -95,6 +95,7 @@ type MuckityContext interface {
 	Storage() MuckityStorage
 	// System() returns MuckitySystem
 	CallingSystem() MuckitySystem
+	MuckityType
 }
 
 // Tertia is the next division down from a second; it's also a tick

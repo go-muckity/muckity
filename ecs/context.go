@@ -30,6 +30,8 @@ func (emptyMktyCtx) Config() MuckityConfig                   { return nil }
 func (emptyMktyCtx) World() MuckityWorld                     { return nil }
 func (emptyMktyCtx) Storage() MuckityStorage                 { return nil }
 func (emptyMktyCtx) CallingSystem() MuckitySystem            { return nil }
+func (emptyMktyCtx) Name() string                            { return "emptyContext" }
+func (emptyMktyCtx) Type() string                            { return "muckity:context" }
 
 var (
 	background = new(emptyMktyCtx)
@@ -195,4 +197,29 @@ func WithStorage(parent MuckityContext, value MuckityStorage) MuckityContext {
 
 func WithSystem(parent MuckityContext, value MuckitySystem) MuckityContext {
 	return WithValue(parent, systemKey, value)
+}
+
+var rootContext MuckityContext
+
+func newContext(ctx ...interface{}) MuckityContext {
+	var mC MuckityContext
+	if len(ctx) == 0 {
+		return rootContext
+	}
+	if len(ctx) == 1 {
+		mC = ctx[0].(MuckityContext)
+		return WithRoot(TODO(), mC)
+	}
+	return WithRoot(todo, background)
+}
+
+// GetContext returns a singleton context object, or an empty root context pointing at
+// a default, unexported Background() context. Pass doOnce: true if you want the singleton
+func GetContext(doOnce bool, ctx ...interface{}) MuckityContext {
+	if doOnce {
+		once.Do(func() {
+			rootContext = newContext(ctx...)
+		})
+	}
+	return newContext(ctx...)
 }
