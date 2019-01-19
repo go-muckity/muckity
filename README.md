@@ -1,4 +1,4 @@
-# Go Muckity [![Build Status](https://travis-ci.org/tsal/muckity.svg?branch=master)](https://travis-ci.org/tsal/muckity)
+# Go Muckity [![Build Status](https://travis-ci.org/go-muckity/muckity.svg?branch=master)](https://travis-ci.org/go-muckity/muckity)
 
 ## Usage
 
