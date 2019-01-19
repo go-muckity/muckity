@@ -1,7 +1,6 @@
 package ecs
 
 import (
-	"context"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"sync"
@@ -9,7 +8,8 @@ import (
 
 // not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
-	config *viper.Viper
+	config    *viper.Viper
+	parentCtx MuckityContext
 }
 
 func (c *muckityConfig) Name() string {
@@ -35,9 +35,9 @@ func (c *muckityConfig) BindEnv(input ...string) error {
 	return err
 }
 
-func (c *muckityConfig) Context() context.Context {
+func (c *muckityConfig) Context() MuckityContext {
 	// TODO: utilize context
-	return context.TODO()
+	return c.parentCtx
 }
 
 func (c muckityConfig) Dump() string {
@@ -56,7 +56,7 @@ var instance *muckityConfig
 
 var once sync.Once
 
-func newConfig() *muckityConfig {
+func newConfig(ctx ...interface{}) *muckityConfig {
 	var mc muckityConfig
 	var err error
 	mc.config = viper.New()
@@ -65,18 +65,21 @@ func newConfig() *muckityConfig {
 	mc.config.AddConfigPath("$HOME/.config/muckity")
 	mc.config.AddConfigPath(".")
 	mc.config.SetEnvPrefix("muckity")
+	if len(ctx) == 1 {
+		mc.parentCtx = ctx[0].(MuckityContext)
+	}
 	err = mc.config.ReadInConfig()
 	if err != nil {
 		panic(err)
 	}
-	mc.config.WatchConfig()
+	mc.config.WatchConfig() // TODO: see if there is a way to implement this with a websocket
 	return &mc
 }
 
-func GetConfig() MuckityConfig {
+func GetConfig(ctx ...interface{}) MuckityConfig {
 	// TODO: Implement per TODO in storage/world
 	once.Do(func() {
-		instance = newConfig()
+		instance = newConfig(ctx...)
 	})
 	return instance
 }

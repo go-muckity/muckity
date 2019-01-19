@@ -1,7 +1,6 @@
 package ecs
 
 import (
-	"context"
 	"fmt"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
@@ -10,11 +9,34 @@ import (
 	"time"
 )
 
+type muckityStorage struct {
+	name string
+	path string
+}
+
+func (ms *muckityStorage) Name() string {
+	return fmt.Sprintf( "%v", ms.name)
+}
+
+func (ms *muckityStorage) Type() string {
+	return fmt.Sprintf("muckity:muckityStorage")
+}
+
+func (ms *muckityStorage) Context() MuckityContext {
+	return TODO()
+}
+
+func (ms muckityStorage) Save(obj MuckityPersistent) error {
+	return nil
+}
+
+var _ MuckityStorage = &muckityStorage{}
+
 type MongoStorage struct {
 	id           interface{}
 	dbUrl        *url2.URL
 	databaseName string
-	parentCtx    context.Context
+	parentCtx    MuckityContext // TODO pass this to Run()
 }
 
 var _ MuckitySystem = &MongoStorage{}
@@ -30,23 +52,23 @@ func (ms *MongoStorage) Type() string {
 	return "muckity:storage"
 }
 
-func (ms *MongoStorage) Context() context.Context {
+func (ms *MongoStorage) Context() MuckityContext {
 	// TODO: utilize context
-	return context.TODO()
+	return TODO()
 }
 
-func (w *MongoStorage) String() string {
-	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
+func (ms *MongoStorage) String() string {
+	return fmt.Sprintf("%v:%v", ms.Type(), ms.Name())
 }
 
 func (ms MongoStorage) Client() (*mongo.Client, error) {
 	var (
-		ctx    context.Context
+		ctx    MuckityContext
 		client *mongo.Client
 		err    error
 	)
 
-	ctx, _ = context.WithTimeout(ms.parentCtx, time.Second*30)
+	ctx, _ = WithTimeout(ms.parentCtx, time.Second*30)
 	client, err = mongo.NewClient(ms.dbUrl.String())
 	err = client.Connect(ctx)
 	return client, err
@@ -91,7 +113,7 @@ func (ms MongoStorage) Save(obj MuckityPersistent) error {
 	return err
 }
 
-func NewMongoStorage(ctx context.Context) *MongoStorage {
+func NewMongoStorage(ctx MuckityContext) *MongoStorage {
 	var (
 		ms     MongoStorage
 		url    interface{}
@@ -121,10 +143,16 @@ func NewMongoStorage(ctx context.Context) *MongoStorage {
 	return &ms
 }
 
+// GetStorage creates a configured and contextualized storage object. It takes any number of parameters, but currently
+// only accepts 0 or 1.  With 0 it will return the default storage object (until 0.1.0, MongoStorage).
+// With 1, it expects either a MuckityWorld (a parent that has a system named "storage" on it), or a MuckityContext.
+// TODO: Implement passing the system name with the World object, to allow for another storage name.
+// TODO: Implement passing a MuckityStorage object
+// TODO: Implement bool for Once()
 func GetStorage(ctx ...interface{}) MuckityStorage {
 	var ms MuckityStorage
 	if len(ctx) == 0 {
-		return NewMongoStorage(context.TODO())
+		return NewMongoStorage(TODO())
 	}
 	if len(ctx) == 1 {
 		switch v := ctx[0].(type) {
@@ -134,7 +162,7 @@ func GetStorage(ctx ...interface{}) MuckityStorage {
 			if system, ok := system.(MuckityStorage); ok {
 				ms = system
 			}
-		case context.Context:
+		case MuckityContext:
 			ms = NewMongoStorage(v)
 		default:
 			panic(fmt.Sprintf("Unimplemented context for GetStorage(): %v", v))

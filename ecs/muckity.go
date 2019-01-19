@@ -1,7 +1,6 @@
 package ecs
 
 import (
-	"context"
 	"time"
 )
 
@@ -23,7 +22,7 @@ type MuckitySystem interface {
 	// Systems can pass whatever context they want down the chain, as long as it's a child of
 	// the world that spawned the system.
 	// TODO: implement this better; this is not the best use-case for context.Context
-	Context() context.Context
+	Context() MuckityContext
 	MuckityType
 }
 
@@ -74,6 +73,29 @@ type MuckityConfig interface {
 	Set(k string, v interface{})
 	BindEnv(input ...string) error
 	MuckitySystem
+}
+
+// MuckityContext implements context.Context w/ additional methods (at some point)
+type MuckityContext interface {
+	// Deadline implemented per context.Deadline
+	Deadline() (deadline time.Time, ok bool)
+	// Done implemented per context.Done()
+	Done() <-chan struct{}
+	// Err implemented per context.Err()
+	Err() error
+	// Value implemented per context.Value()
+	Value(key interface{}) interface{}
+	// Root() returns MuckityType
+	Root() MuckityType
+	// Config() returns MuckityConfig
+	Config() MuckityConfig
+	// World() returns MuckityWorld
+	World() MuckityWorld
+	// Storage() returns MuckityStorage
+	Storage() MuckityStorage
+	// System() returns MuckitySystem
+	CallingSystem() MuckitySystem
+	MuckityType
 }
 
 // Tertia is the next division down from a second; it's also a tick

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/go-muckity/muckity/ecs"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -57,7 +56,7 @@ func runLoop(w *myWorld) error {
 type myWorld struct {
 	id          string
 	name        string
-	myContext   context.Context
+	myContext   ecs.MuckityContext
 	description string
 	zones       []string
 	ticker      *myTicker
@@ -88,7 +87,7 @@ func (w *myWorld) Type() string {
 	return "world"
 }
 
-func (w *myWorld) Context() context.Context {
+func (w *myWorld) Context() ecs.MuckityContext {
 	return w.myContext
 }
 
@@ -129,10 +128,10 @@ func main() {
 	var w ecs.MuckityWorld
 	var w2 ecs.MuckityWorld
 
-	w = ecs.GetWorld(&myWorld{
+	w = ecs.GetWorld(false, &myWorld{
 		"world:myMuckityWorld",
 		"myMuckityWorld",
-		context.TODO(),
+		ecs.TODO(),
 		"dull",
 		make([]string, 0), createTicker(), 0, 0})
 
@@ -147,7 +146,7 @@ Type: %v
 	w.AddSystems(storage) // does nothing
 	storage.Save(w)       // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
 
-	w2 = ecs.GetWorld()
+	w2 = ecs.GetWorld(false)
 	for _, system := range w2.GetSystems() {
 		if system.GetSystem().Type() == "muckity:storage" {
 			fmt.Println("Storage loaded from world: ", system.GetSystem().Type()) // prints nothing
