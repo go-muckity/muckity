@@ -82,7 +82,7 @@ The long-term intent is to have the framework implementation be flat-file storag
 - [X] Implement base and basic systems
 - [X] Implement agnostic storage and configuration interface examples
 - [ ] Create doc.go in ecs, and keep it updated
-- [ ] Implement context-handling
+- [X] Implement context-handling
 
 ### v0.2.0
 
