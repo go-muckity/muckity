@@ -3,6 +3,7 @@ module github.com/go-muckity/muckity
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/coreos/etcd v3.3.11+incompatible // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/google/go-cmp v0.2.0 // indirect

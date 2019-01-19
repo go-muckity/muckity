@@ -9,6 +9,29 @@ import (
 	"time"
 )
 
+type muckityStorage struct {
+	name string
+	path string
+}
+
+func (ms *muckityStorage) Name() string {
+	return fmt.Sprintf( "%v", ms.name)
+}
+
+func (ms *muckityStorage) Type() string {
+	return fmt.Sprintf("muckity:muckityStorage")
+}
+
+func (ms *muckityStorage) Context() MuckityContext {
+	return TODO()
+}
+
+func (ms muckityStorage) Save(obj MuckityPersistent) error {
+	return nil
+}
+
+var _ MuckityStorage = &muckityStorage{}
+
 type MongoStorage struct {
 	id           interface{}
 	dbUrl        *url2.URL
