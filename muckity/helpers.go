@@ -1,4 +1,4 @@
-package ecs
+package muckity
 
 import (
 	"github.com/mongodb/mongo-go-driver/mongo/options"
