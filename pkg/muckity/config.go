@@ -1,4 +1,4 @@
-package ecs
+package muckity
 
 import (
 	"github.com/spf13/viper"
@@ -8,8 +8,7 @@ import (
 
 // not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
-	config    *viper.Viper
-	parentCtx MuckityContext
+	config *viper.Viper
 }
 
 func (c *muckityConfig) Name() string {
@@ -35,11 +34,6 @@ func (c *muckityConfig) BindEnv(input ...string) error {
 	return err
 }
 
-func (c *muckityConfig) Context() MuckityContext {
-	// TODO: utilize context
-	return c.parentCtx
-}
-
 func (c muckityConfig) Dump() string {
 	conf := c.config.AllSettings()
 	bs, err := yaml.Marshal(conf)
@@ -49,14 +43,14 @@ func (c muckityConfig) Dump() string {
 	return string(bs)
 }
 
-var _ MuckityConfig = &muckityConfig{}
-var _ MuckitySystem = &muckityConfig{}
+var _ Config = &muckityConfig{}
+var _ System = &muckityConfig{}
 
 var instance *muckityConfig
 
 var once sync.Once
 
-func newConfig(ctx ...interface{}) *muckityConfig {
+func newConfig(_ ...interface{}) *muckityConfig {
 	var mc muckityConfig
 	var err error
 	mc.config = viper.New()
@@ -65,21 +59,10 @@ func newConfig(ctx ...interface{}) *muckityConfig {
 	mc.config.AddConfigPath("$HOME/.config/muckity")
 	mc.config.AddConfigPath(".")
 	mc.config.SetEnvPrefix("muckity")
-	if len(ctx) == 1 {
-		mc.parentCtx = ctx[0].(MuckityContext)
-	}
 	err = mc.config.ReadInConfig()
 	if err != nil {
 		panic(err)
 	}
 	mc.config.WatchConfig() // TODO: see if there is a way to implement this with a websocket
 	return &mc
-}
-
-func GetConfig(ctx ...interface{}) MuckityConfig {
-	// TODO: Implement per TODO in storage/world
-	once.Do(func() {
-		instance = newConfig(ctx...)
-	})
-	return instance
 }
