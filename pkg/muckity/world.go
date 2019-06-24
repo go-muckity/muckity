@@ -64,28 +64,11 @@ func (w *GenericWorld) BSON() interface{} {
 	return p
 }
 
-func GetWorld(doOnce bool, ctx ...interface{}) World {
+func GetWorld() World {
 	var (
-		wCtx    Context
-		world   World
+		wCtx  Context
+		world World
 	)
-	if len(ctx) < 2 {
-		// TODO: utilize context
-		wCtx = Background()
-		world = &GenericWorld{nil, "descriptive-world", wCtx, make([]SystemRef, 0)}
-		if len(ctx) == 1 {
-			switch v := ctx[0].(type) {
-			case string:
-				world = &GenericWorld{nil, v, wCtx, make([]SystemRef, 0)}
-			case Config:
-				// Required config model is directly passed
-				world.AddSystems(v)
-			case World:
-				world = v
-			default:
-				panic("Unknown interface passed to GetWorld()")
-			}
-		}
-	}
+	world = &GenericWorld{nil, "generic-world", wCtx, make([]SystemRef, 0)}
 	return world
 }

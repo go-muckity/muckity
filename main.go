@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/go-muckity/muckity/pkg/muckity"
-	"github.com/mongodb/mongo-go-driver/bson"
 	"time"
 )
 
@@ -53,14 +52,14 @@ func runLoop(w *myWorld) {
 }
 
 type myWorld struct {
-	id          string
 	name        string
-	myContext   muckity.Context
-	description string
-	zones       []string
 	ticker      *myTicker
 	currentTick uint
 	turnCycle   uint
+}
+
+func (w *myWorld) Context() muckity.Context {
+	panic("implement me")
 }
 
 var _ muckity.World = &myWorld{}
@@ -82,63 +81,22 @@ func (w *myWorld) Name() string {
 	return w.name
 }
 
-func (w *myWorld) Type() string {
-	return "world"
-}
-
-func (w *myWorld) Context() muckity.Context {
-	return w.myContext
-}
-
 func (w *myWorld) String() string {
-	return fmt.Sprintf("%v:%v", w.Type(), w.Name())
-}
-
-func (w *myWorld) BSON() interface{} {
-	p := bson.D{
-		{"$set", bson.D{
-			{
-				"name",
-				w.Name(),
-			},
-			{
-				"description",
-				w.description,
-			},
-			{
-				"zones",
-				w.zones,
-			},
-		}},
-	}
-	return p
-}
-
-func (w *myWorld) GetId() string {
-	// TODO: needs better checking
-	return w.id
-}
-
-func (w *myWorld) SetId(id string) {
-	w.id = id
+	return fmt.Sprintf("%v", w.Name())
 }
 
 func main() {
 	var w muckity.World
 	var w2 muckity.World
 
-	w = muckity.GetWorld(false, &myWorld{
-		"world:myMuckityWorld",
-		"myMuckityWorld",
-		muckity.TODO(),
-		"dull",
-		make([]string, 0), createTicker(), 0, 0})
-
+	w = &myWorld{
+		"myWorld",
+		createTicker(), 0, 0}
 	fmt.Printf(`GenericWorld: %v
 `, w.Name())
 
 	go runLoop(w.(*myWorld))
-	w2 = muckity.GetWorld(false)
+	w2 = muckity.GetWorld()
 	fmt.Println("GenericWorld named: ", w2.Name())
 	time.Sleep(time.Second * 5)
 }
