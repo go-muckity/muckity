@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-muckity/muckity/ecs"
+	"github.com/go-muckity/muckity/pkg/muckity"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"time"
 )
 
-const Turn = ecs.Tertia * 20
+const Turn = muckity.Tertia * 20
 const SimpleAction = Turn
 const ComplexAction = Turn * 2
 const LongAction = Turn * 3
@@ -20,7 +20,7 @@ type myTicker struct {
 
 func createTicker() *myTicker {
 	t := new(myTicker)
-	t.tertia = time.NewTicker(ecs.Tertia).C
+	t.tertia = time.NewTicker(muckity.Tertia).C
 	t.turn = time.NewTicker(Turn).C
 	// TODO: use real communications instead of a death timer
 	timeout := time.After(time.Second * 2)
@@ -56,7 +56,7 @@ func runLoop(w *myWorld) error {
 type myWorld struct {
 	id          string
 	name        string
-	myContext   ecs.MuckityContext
+	myContext   muckity.MuckityContext
 	description string
 	zones       []string
 	ticker      *myTicker
@@ -64,18 +64,18 @@ type myWorld struct {
 	turnCycle   uint
 }
 
-var _ ecs.MuckityWorld = &myWorld{}
+var _ muckity.MuckityWorld = &myWorld{}
 
-func (w *myWorld) AddSystems(systems ...ecs.MuckitySystem) {
+func (w *myWorld) AddSystems(systems ...muckity.MuckitySystem) {
 	return
 }
 
-func (w *myWorld) GetSystems() []ecs.MuckitySystemRef {
-	var ms = make([]ecs.MuckitySystemRef, 0)
+func (w *myWorld) GetSystems() []muckity.MuckitySystemRef {
+	var ms = make([]muckity.MuckitySystemRef, 0)
 	return ms
 }
-func (w *myWorld) GetSystem(name string) ecs.MuckitySystemRef {
-	var ms ecs.MuckitySystemRef
+func (w *myWorld) GetSystem(name string) muckity.MuckitySystemRef {
+	var ms muckity.MuckitySystemRef
 	return ms
 }
 
@@ -87,7 +87,7 @@ func (w *myWorld) Type() string {
 	return "world"
 }
 
-func (w *myWorld) Context() ecs.MuckityContext {
+func (w *myWorld) Context() muckity.MuckityContext {
 	return w.myContext
 }
 
@@ -125,13 +125,13 @@ func (w *myWorld) SetId(id string) {
 }
 
 func main() {
-	var w ecs.MuckityWorld
-	var w2 ecs.MuckityWorld
+	var w muckity.MuckityWorld
+	var w2 muckity.MuckityWorld
 
-	w = ecs.GetWorld(false, &myWorld{
+	w = muckity.GetWorld(false, &myWorld{
 		"world:myMuckityWorld",
 		"myMuckityWorld",
-		ecs.TODO(),
+		muckity.TODO(),
 		"dull",
 		make([]string, 0), createTicker(), 0, 0})
 
@@ -142,15 +142,15 @@ Type: %v
 
 	go runLoop(w.(*myWorld))
 	fmt.Println("BSON: ", w.BSON())
-	storage := ecs.GetStorage(w.Context())
+	storage := muckity.GetStorage(w.Context())
 	w.AddSystems(storage) // does nothing
 	storage.Save(w)       // currently does something; saves the world (TODO: Save() gets moved to MuckityPersistent)
 
-	w2 = ecs.GetWorld(false)
+	w2 = muckity.GetWorld(false)
 	for _, system := range w2.GetSystems() {
 		if system.GetSystem().Type() == "muckity:storage" {
 			fmt.Println("Storage loaded from world: ", system.GetSystem().Type()) // prints nothing
-			if storage, ok := system.GetSystem().(ecs.MuckityStorage); ok {
+			if storage, ok := system.GetSystem().(muckity.MuckityStorage); ok {
 				storage.Save(w)
 			}
 		}

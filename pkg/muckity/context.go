@@ -142,7 +142,7 @@ func (ctx *valueCtx) Value(key interface{}) interface{} {
 	if key == ctx.key {
 		return ctx.value
 	}
-	return ctx.MuckityContext.Value(key)
+	return ctx.Value(key)
 }
 
 func WithValue(parent MuckityContext, key, value interface{}) MuckityContext {

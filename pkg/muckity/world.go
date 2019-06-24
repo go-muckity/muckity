@@ -36,7 +36,7 @@ func (w *World) String() string {
 func (w *World) AddSystems(systems ...MuckitySystem) {
 	for _, system := range systems {
 		sysRef := new(MuckitySystemRef)
-		sysRef.system = system
+		system = system
 		w.systems = append(w.systems, *sysRef)
 	}
 }
@@ -46,7 +46,7 @@ var _ MuckityWorld = &World{}
 func (w *World) GetSystem(name string) MuckitySystemRef {
 	var ref MuckitySystemRef
 	for _, ref = range w.systems {
-		if ref.GetSystem().Name() == name {
+		if w.Name() == name {
 			return ref
 		}
 	}
