@@ -10,26 +10,24 @@ import (
 type key int
 
 const (
-	rootKey    key = iota // root object pointer, of MuckityType
-	configKey             // MuckityConfig interface
-	worldKey              // MuckityWorld interface
-	storageKey            // MuckityStorage interface
-	systemKey             // MuckitySystem interface
+	rootKey    key = iota // root object pointer, of Type
+	configKey             // Config interface
+	worldKey              // World interface
+	storageKey            // Storage interface
+	systemKey             // System interface
 )
 
 type emptyMktyCtx int
 
-var _ MuckityContext = new(emptyMktyCtx)
+var _ Context = new(emptyMktyCtx)
 
 func (emptyMktyCtx) Deadline() (deadline time.Time, ok bool) { return }
 func (emptyMktyCtx) Done() <-chan struct{}                   { return nil }
 func (emptyMktyCtx) Err() error                              { return nil }
 func (emptyMktyCtx) Value(key interface{}) interface{}       { return nil }
-func (emptyMktyCtx) Root() MuckityType                       { return nil }
-func (emptyMktyCtx) Config() MuckityConfig                   { return nil }
-func (emptyMktyCtx) World() MuckityWorld                     { return nil }
-func (emptyMktyCtx) Storage() MuckityStorage                 { return nil }
-func (emptyMktyCtx) CallingSystem() MuckitySystem            { return nil }
+func (emptyMktyCtx) Config() Config                          { return nil }
+func (emptyMktyCtx) World() World                            { return nil }
+func (emptyMktyCtx) CallingSystem() System                   { return nil }
 func (emptyMktyCtx) Name() string                            { return "emptyContext" }
 func (emptyMktyCtx) Type() string                            { return "muckity:context" }
 
@@ -38,17 +36,17 @@ var (
 	todo       = new(emptyMktyCtx)
 )
 
-func Background() MuckityContext { return background }
-func TODO() MuckityContext       { return todo }
+func Background() Context { return background }
+func TODO() Context       { return todo }
 
 type cancelCtx struct {
-	MuckityContext
+	Context
 	done chan struct{}
 	err  error
 	mu   sync.Mutex
 }
 
-var _ MuckityContext = &cancelCtx{}
+var _ Context = &cancelCtx{}
 
 func (ctx *cancelCtx) Done() <-chan struct{} { return ctx.done }
 func (ctx *cancelCtx) Err() error {
@@ -61,7 +59,7 @@ var Canceled = errors.New("context canceled")
 
 type CancelFunc func()
 
-func WithCancel(parent MuckityContext) (MuckityContext, CancelFunc) {
+func WithCancel(parent Context) (Context, CancelFunc) {
 	ctx := &cancelCtx{
 		parent,
 		make(chan struct{}),
@@ -99,7 +97,7 @@ type deadlineCtx struct {
 	deadline time.Time
 }
 
-var _ MuckityContext = &deadlineCtx{}
+var _ Context = &deadlineCtx{}
 
 func (ctx *deadlineCtx) Deadline() (deadline time.Time, ok bool) {
 	return ctx.deadline, true
@@ -107,7 +105,7 @@ func (ctx *deadlineCtx) Deadline() (deadline time.Time, ok bool) {
 
 var DeadlineExceeded = errors.New("deadline exceeded")
 
-func WithDeadline(parent MuckityContext, deadline time.Time) (MuckityContext, CancelFunc) {
+func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc) {
 	cctx, cancel := WithCancel(parent)
 
 	ctx := &deadlineCtx{
@@ -127,16 +125,16 @@ func WithDeadline(parent MuckityContext, deadline time.Time) (MuckityContext, Ca
 	return ctx, stop
 }
 
-func WithTimeout(parent MuckityContext, timeout time.Duration) (MuckityContext, CancelFunc) {
+func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc) {
 	return WithDeadline(parent, time.Now().Add(timeout))
 }
 
 type valueCtx struct {
-	MuckityContext
+	Context
 	value, key interface{}
 }
 
-var _ MuckityContext = &valueCtx{}
+var _ Context = &valueCtx{}
 
 func (ctx *valueCtx) Value(key interface{}) interface{} {
 	if key == ctx.key {
@@ -145,7 +143,7 @@ func (ctx *valueCtx) Value(key interface{}) interface{} {
 	return ctx.Value(key)
 }
 
-func WithValue(parent MuckityContext, key, value interface{}) MuckityContext {
+func WithValue(parent Context, key, value interface{}) Context {
 	if key == nil {
 		panic("key is nil")
 	}
@@ -159,67 +157,46 @@ func WithValue(parent MuckityContext, key, value interface{}) MuckityContext {
 	}
 }
 
-func (ctx *valueCtx) Root() MuckityType {
-	return ctx.Value(rootKey).(MuckityType)
+func (ctx *valueCtx) Config() Config {
+	return ctx.Value(configKey).(Config)
 }
 
-func (ctx *valueCtx) Config() MuckityConfig {
-	return ctx.Value(configKey).(MuckityConfig)
+func (ctx *valueCtx) World() World {
+	return ctx.Value(worldKey).(World)
 }
 
-func (ctx *valueCtx) World() MuckityWorld {
-	return ctx.Value(worldKey).(MuckityWorld)
+func (ctx *valueCtx) CallingSystem() System {
+	return ctx.Value(systemKey).(System)
 }
 
-func (ctx *valueCtx) Storage() MuckityStorage {
-	return ctx.Value(storageKey).(MuckityStorage)
-}
-
-func (ctx *valueCtx) CallingSystem() MuckitySystem {
-	return ctx.Value(systemKey).(MuckitySystem)
-}
-
-func WithRoot(parent MuckityContext, value MuckityType) MuckityContext {
-	return WithValue(parent, rootKey, value)
-}
-
-func WithConfig(parent MuckityContext, value MuckityConfig) MuckityContext {
+func WithConfig(parent Context, value Config) Context {
 	return WithValue(parent, configKey, value)
 }
 
-func WithWorld(parent MuckityContext, value MuckityWorld) MuckityContext {
+func WithWorld(parent Context, value World) Context {
 	return WithValue(parent, worldKey, value)
 }
 
-func WithStorage(parent MuckityContext, value MuckityStorage) MuckityContext {
-	return WithValue(parent, storageKey, value)
-}
-
-func WithSystem(parent MuckityContext, value MuckitySystem) MuckityContext {
+func WithSystem(parent Context, value System) Context {
 	return WithValue(parent, systemKey, value)
 }
 
-var rootContext MuckityContext
+var rootCtx Context
 
-func newContext(ctx ...interface{}) MuckityContext {
-	var mC MuckityContext
-	if len(ctx) == 0 {
-		return rootContext
+func rootContext() Context {
+	if rootCtx == nil {
+		rootCtx = new(emptyMktyCtx)
 	}
-	if len(ctx) == 1 {
-		mC = ctx[0].(MuckityContext)
-		return WithRoot(TODO(), mC)
-	}
-	return WithRoot(todo, background)
+	return rootCtx
 }
 
 // GetContext returns a singleton context object, or an empty root context pointing at
 // a default, unexported Background() context. Pass doOnce: true if you want the singleton
-func GetContext(doOnce bool, ctx ...interface{}) MuckityContext {
+func GetContext(doOnce bool, ctx ...interface{}) Context {
 	if doOnce {
 		once.Do(func() {
-			rootContext = newContext(ctx...)
+			rootCtx = rootContext()
 		})
 	}
-	return newContext(ctx...)
+	return rootContext()
 }

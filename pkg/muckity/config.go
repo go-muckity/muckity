@@ -9,7 +9,7 @@ import (
 // not exported as this should be super-simple to implement if you don't want to use muckity.yml.
 type muckityConfig struct {
 	config    *viper.Viper
-	parentCtx MuckityContext
+	parentCtx Context
 }
 
 func (c *muckityConfig) Name() string {
@@ -35,7 +35,7 @@ func (c *muckityConfig) BindEnv(input ...string) error {
 	return err
 }
 
-func (c *muckityConfig) Context() MuckityContext {
+func (c *muckityConfig) Context() Context {
 	// TODO: utilize context
 	return c.parentCtx
 }
@@ -49,8 +49,8 @@ func (c muckityConfig) Dump() string {
 	return string(bs)
 }
 
-var _ MuckityConfig = &muckityConfig{}
-var _ MuckitySystem = &muckityConfig{}
+var _ Config = &muckityConfig{}
+var _ System = &muckityConfig{}
 
 var instance *muckityConfig
 
@@ -66,7 +66,7 @@ func newConfig(ctx ...interface{}) *muckityConfig {
 	mc.config.AddConfigPath(".")
 	mc.config.SetEnvPrefix("muckity")
 	if len(ctx) == 1 {
-		mc.parentCtx = ctx[0].(MuckityContext)
+		mc.parentCtx = ctx[0].(Context)
 	}
 	err = mc.config.ReadInConfig()
 	if err != nil {
@@ -76,7 +76,7 @@ func newConfig(ctx ...interface{}) *muckityConfig {
 	return &mc
 }
 
-func GetConfig(ctx ...interface{}) MuckityConfig {
+func GetConfig(ctx ...interface{}) Config {
 	// TODO: Implement per TODO in storage/world
 	once.Do(func() {
 		instance = newConfig(ctx...)
