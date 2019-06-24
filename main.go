@@ -58,10 +58,6 @@ type myWorld struct {
 	turnCycle   uint
 }
 
-func (w *myWorld) Context() muckity.Context {
-	panic("implement me")
-}
-
 var _ muckity.World = &myWorld{}
 
 func (w *myWorld) AddSystems(systems ...muckity.System) {

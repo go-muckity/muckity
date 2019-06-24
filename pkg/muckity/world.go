@@ -7,21 +7,15 @@ import (
 
 // GenericWorld is the default implementation of World
 type GenericWorld struct {
-	id        interface{}
-	name      string
-	parentCtx Context
-	systems   []SystemRef
+	id      interface{}
+	name    string
+	systems []SystemRef
 }
 
 var _ World = &GenericWorld{}
 
 func (w *GenericWorld) Name() string {
 	return w.name
-}
-
-func (w *GenericWorld) Context() Context {
-	// TODO: utilize context
-	return w.parentCtx
 }
 
 func (w *GenericWorld) String() string {
@@ -66,9 +60,8 @@ func (w *GenericWorld) BSON() interface{} {
 
 func GetWorld() World {
 	var (
-		wCtx  Context
 		world World
 	)
-	world = &GenericWorld{nil, "generic-world", wCtx, make([]SystemRef, 0)}
+	world = &GenericWorld{nil, "generic-world", make([]SystemRef, 0)}
 	return world
 }
