@@ -4,15 +4,9 @@ import (
 	"fmt"
 )
 
-// GenericWorld is the default implementation of World
-type GenericWorld struct {
-	id      interface{}
-	name    string
-	systems []System
-}
+var _ System = &GenericSystem{}
 
-var _ World = &GenericWorld{}
-
+// GenericSystem is the default implementation of System
 type GenericSystem struct {
 	name string
 }
@@ -21,8 +15,13 @@ func (s GenericSystem) String() string {
 	return s.name
 }
 
-func (w *GenericWorld) String() string {
-	return fmt.Sprintf("%v", w.name)
+var _ World = &GenericWorld{}
+
+// GenericWorld is the default implementation of World
+type GenericWorld struct {
+	id      interface{}
+	name    string
+	systems []System
 }
 
 func (w *GenericWorld) AddSystems(systems ...System) {
@@ -32,10 +31,7 @@ func (w *GenericWorld) AddSystems(systems ...System) {
 		w.systems = append(w.systems, *sysRef)
 	}
 }
-
-var _ World = &GenericWorld{}
-
-func (w *GenericWorld) GetSystem(name string) System {
+func (w GenericWorld) GetSystem(name string) System {
 	var ref System
 	for _, ref = range w.systems {
 		if w.name == name {
@@ -44,11 +40,12 @@ func (w *GenericWorld) GetSystem(name string) System {
 	}
 	panic("Could not find requested system! Try using GetSystems")
 }
-
-func (w *GenericWorld) GetSystems() []System {
+func (w GenericWorld) GetSystems() []System {
 	return w.systems
 }
-
+func (w GenericWorld) String() string {
+	return fmt.Sprintf("%v", w.name)
+}
 func GetWorld() World {
 	var (
 		world World

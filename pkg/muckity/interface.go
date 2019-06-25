@@ -34,7 +34,7 @@ type World interface {
 	AddSystems(systems ...System)
 	GetSystem(name string) System
 	GetSystems() []System
-	System
+	fmt.Stringer
 }
 
 // Config is the interface used to access config; based on viper as the model implementation uses viper
