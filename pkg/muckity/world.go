@@ -2,7 +2,6 @@ package muckity
 
 import (
 	"fmt"
-	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 // GenericWorld is the default implementation of World
@@ -44,18 +43,6 @@ func (w *GenericWorld) GetSystem(name string) SystemRef {
 
 func (w *GenericWorld) GetSystems() []SystemRef {
 	return w.systems
-}
-
-func (w *GenericWorld) BSON() interface{} {
-	p := bson.D{
-		{"$set", bson.D{
-			{
-				"name",
-				w.Name(),
-			},
-		}},
-	}
-	return p
 }
 
 func GetWorld() World {
