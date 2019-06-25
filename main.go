@@ -64,21 +64,17 @@ func (w *myWorld) AddSystems(systems ...muckity.System) {
 	return
 }
 
-func (w *myWorld) GetSystems() []muckity.SystemRef {
-	var ms = make([]muckity.SystemRef, 0)
+func (w *myWorld) GetSystems() []muckity.System {
+	var ms = make([]muckity.System, 0)
 	return ms
 }
-func (w *myWorld) GetSystem(name string) muckity.SystemRef {
-	var ms muckity.SystemRef
+func (w *myWorld) GetSystem(name string) muckity.System {
+	var ms muckity.System
 	return ms
-}
-
-func (w *myWorld) Name() string {
-	return w.name
 }
 
 func (w *myWorld) String() string {
-	return fmt.Sprintf("%v", w.Name())
+	return fmt.Sprintf("%v", w.name)
 }
 
 func main() {
@@ -89,10 +85,10 @@ func main() {
 		"myWorld",
 		createTicker(), 0, 0}
 	fmt.Printf(`GenericWorld: %v
-`, w.Name())
+`, w.String())
 
 	go runLoop(w.(*myWorld))
 	w2 = muckity.GetWorld()
-	fmt.Println("GenericWorld named: ", w2.Name())
+	fmt.Println("GenericWorld named: ", w2.String())
 	time.Sleep(time.Second * 5)
 }

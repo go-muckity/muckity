@@ -1,31 +1,39 @@
 package muckity
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/mongodb/mongo-go-driver/x/mongo/driver/uuid"
 	"time"
 )
 
-type Namer interface {
-	Name() string
+type Message interface {
+	Value() interface{}
+}
+
+type Muckity interface {
+	UUID() uuid.UUID
+	publisher() <-chan Message
+	subscriber() chan<- Message
+	messages() chan Message
+	Cancel() func()
+	Worlds(...int) []World
+	GlobalSystems() []System
+	fmt.Stringer
+	json.Marshaler
+	json.Unmarshaler
 }
 
 // System is used for contextual information discovery
 type System interface {
-	Namer
-}
-
-type SystemRef struct {
-	system System
-}
-
-func (msr SystemRef) GetSystem() System {
-	return msr.system
+	fmt.Stringer
 }
 
 // World models the implementation of a central management system; a "world" in mu* terms
 type World interface {
 	AddSystems(systems ...System)
-	GetSystem(name string) SystemRef
-	GetSystems() []SystemRef
+	GetSystem(name string) System
+	GetSystems() []System
 	System
 }
 
