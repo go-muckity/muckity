@@ -13,3 +13,4 @@
 
 # Node stuff
 test/node_modules/
+go.sum

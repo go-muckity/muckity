@@ -1,8 +1,0 @@
-version: 0
-mongodb:
-  url: "mongodb://muckity:muckity@localhost:27017/"
-  name: "muckity"
-  collectionRoot: "muckity"
-world:
-  name: "descriptive-world"
-  storage: "muckity:storage"
