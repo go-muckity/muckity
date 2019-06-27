@@ -37,14 +37,12 @@ type TickingSystem interface {
 }
 ```
 
-## Project Goals
+## Project History / Goals
 
 ### v0.1.0
 
 - [X] Implement base and basic systems
-- [X] Implement agnostic storage and configuration interface examples
 - [X] Create doc.go in ecs, and keep it updated
-- [X] Implement context-handling
 
 ### v2.0.0
 
