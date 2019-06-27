@@ -5,5 +5,5 @@ go:
 - "1.12.x"
 
 script:
-- go test -v ./...
+- go test -race -v ./...
 - go run main.go
