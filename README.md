@@ -2,7 +2,7 @@
 
 ## Usage
 
-Take a look at `muckity/world.go` for a sample implementation of `WorldSystem`, first. Then, take a look at `main.go` for the test script of the interfaces.
+Take a look at `pkg/muckity/world.go` for a sample implementation of `WorldSystem`, first. Then, take a look at `main.go` for the test script of the interfaces.
 
 As of this writing (v2.0.0), there are only basic components (refererred to as _systems_ in muckity) provided in the framework.
 
