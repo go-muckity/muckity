@@ -4,12 +4,12 @@
 
 Take a look at `muckity/world.go` for a sample implementation of `WorldSystem`, first. Then, take a look at `main.go` for the test script of the interfaces.
 
-As of this writing (v0.0.1), there are only basic entities and components (refererred to as _systems_ in muckity) provided in the framework.
+As of this writing (v2.0.0), there are only basic components (refererred to as _systems_ in muckity) provided in the framework.
 
-First things first, you will need to import the ecs into your code.  Note, in this example, I'm importing `ecs` as `muckity` for aesthetics.
+First things first, you will need to import the ecs into your code.  
 
 ```go
-import muckity "github.com/go-muckity/pkg/muckity"
+import "github.com/go-muckity/pkg/muckity"
 ```
 
 Next, you will want to probably implement the interface `muckity.WorldSystem`:
