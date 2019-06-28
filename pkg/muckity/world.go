@@ -3,6 +3,7 @@ package muckity
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"sync"
 	"time"
 )
 
@@ -30,6 +31,7 @@ type GenericWorld struct {
 	ticker      Ticker
 	currentTick int
 	tickMax     int
+	waitTicker  sync.WaitGroup
 }
 
 func (w *GenericWorld) Join(interface{}) error {
@@ -39,10 +41,14 @@ func (w *GenericWorld) Join(interface{}) error {
 var TickNotImplemented = fmt.Errorf("tick function not implemented for this world; this can probably be ignored")
 
 func (w *GenericWorld) Tick() error {
-	w.currentTick++
 	if w.currentTick%10 == 0 {
 		fmt.Printf("world update: %s - TICK: %04d\n", w.Name(), w.currentTick)
 	}
+	if w.currentTick >= w.tickMax {
+		w.Shutdown()
+		return nil
+	}
+	w.currentTick++
 	return nil
 }
 func (w *GenericWorld) Init(opts ...interface{}) error {
@@ -77,19 +83,23 @@ func (w *GenericWorld) Init(opts ...interface{}) error {
 		w.ticker = new(GenericTicker)
 		_ = w.ticker.Target(w)
 		err = w.ticker.Init(opts)
+		if err != nil {
+			return err
+		}
 	}
 	return err
 }
 func (w *GenericWorld) Run() (int, error) {
+	var err error
 	fmt.Println("world starting:", w.Name())
-	c, err := w.ticker.Run()
-	if err != nil {
-		return c, err
+	w.waitTicker.Add(1)
+	var tRunner = func() {
+		defer w.waitTicker.Done()
+		_, err = w.ticker.Run()
 	}
-	if c == -2 {
-		fmt.Printf("world %s shutdown\n", w.Name())
-	}
-	return w.currentTick, nil
+	go tRunner()
+	w.waitTicker.Wait()
+	return w.currentTick, err
 }
 func (w *GenericWorld) Shutdown() {
 	w.ticker.Shutdown()
